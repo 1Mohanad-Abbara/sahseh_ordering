@@ -11,12 +11,10 @@ const EMPTY_FORM = {
 };
 const PHONE_LENGTH = 10;
 const TEXT_ONLY_PATTERN = /^[\p{L}\p{M}\s]+$/u;
-const ADDRESS_TEXT_PATTERN = /^[\p{L}\p{M}\s،,.\-]+$/u;
 
 function sanitizeFormField(name, value) {
   if (name === "phone") return value.replace(/\D/g, "").slice(0, PHONE_LENGTH);
   if (name === "name") return value.replace(/[^\p{L}\p{M}\s]/gu, "");
-  if (name === "address") return value.replace(/[^\p{L}\p{M}\s،,.\-]/gu, "");
   return value;
 }
 
@@ -562,6 +560,19 @@ export default function OrderingApp() {
 
   const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
+
+  useEffect(() => {
+    if (categories.length === 0) return undefined;
+
+    const sectionId = decodeURIComponent(window.location.hash.replace(/^#/, ""));
+    if (!sectionId) return undefined;
+
+    const timeout = window.setTimeout(() => {
+      scrollToSection(sectionId, "auto", false);
+    }, 50);
+
+    return () => window.clearTimeout(timeout);
+  }, [categories.length]);
   function setProductQuantity(productId, nextQuantity) {
     setSubmittedOrder("");
     setCart((current) => {
@@ -601,7 +612,7 @@ export default function OrderingApp() {
   function validateForm() {
     const errors = {};
     const name = normalizeText(form.name);
-    const address = normalizeText(form.address);
+    const address = form.address.trim();
 
     if (!name) {
       errors.name = "الاسم مطلوب.";
@@ -617,12 +628,11 @@ export default function OrderingApp() {
 
     if (!address) {
       errors.address = "العنوان مطلوب.";
-    } else if (!ADDRESS_TEXT_PATTERN.test(address)) {
-      errors.address = "العنوان يجب أن يحتوي على أحرف فقط.";
     }
 
     return errors;
   }
+
   function handleSubmit(event) {
     event.preventDefault();
     if (isSubmitting || cartItems.length === 0) return;
@@ -651,15 +661,14 @@ export default function OrderingApp() {
     return headerHeight + 8;
   }
 
-  function scrollToSection(sectionId) {
+  function scrollToSection(sectionId, behavior = "smooth", updateHash = true) {
     const section = document.getElementById(sectionId);
     if (!section) return;
 
     const targetTop = window.scrollY + section.getBoundingClientRect().top - fixedOffset();
-    window.scrollTo({ top: Math.max(targetTop, 0), behavior: "smooth" });
-    window.history.replaceState(null, "", `#${sectionId}`);
+    window.scrollTo({ top: Math.max(targetTop, 0), behavior });
+    if (updateHash) window.history.replaceState(null, "", `#${sectionId}`);
   }
-
   return (
     <>
       <Header brand={brand} itemCount={itemCount} cartOpen={cartOpen} onCartToggle={() => setCartOpen((open) => !open)} />
@@ -738,6 +747,8 @@ export default function OrderingApp() {
     </>
   );
 }
+
+
 
 
 

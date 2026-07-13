@@ -1000,11 +1000,14 @@ h1 {
 }
 
 .footer-info a {
+  display: inline-flex;
+  justify-self: start;
+  width: max-content;
+  max-width: 100%;
   direction: ltr;
   text-align: right;
   color: #fff;
 }
-
 .footer-info p {
   color: rgba(255, 255, 255, 0.88);
 }
@@ -1280,6 +1283,7 @@ h1 {
     font-size: 0.68rem;
   }
 }
+
 
 
 
