@@ -1,4 +1,3 @@
-"use client";
 
 import { useEffect, useMemo, useState } from "react";
 
@@ -10,6 +9,20 @@ const EMPTY_FORM = {
   address: "",
   notes: ""
 };
+const PHONE_LENGTH = 10;
+const TEXT_ONLY_PATTERN = /^[\p{L}\p{M}\s]+$/u;
+const ADDRESS_TEXT_PATTERN = /^[\p{L}\p{M}\s،,.\-]+$/u;
+
+function sanitizeFormField(name, value) {
+  if (name === "phone") return value.replace(/\D/g, "").slice(0, PHONE_LENGTH);
+  if (name === "name") return value.replace(/[^\p{L}\p{M}\s]/gu, "");
+  if (name === "address") return value.replace(/[^\p{L}\p{M}\s،,.\-]/gu, "");
+  return value;
+}
+
+function normalizeText(value) {
+  return value.replace(/\s+/g, " ").trim();
+}
 
 function orderedItems(items = []) {
   return [...items].sort((first, second) => {
@@ -89,7 +102,7 @@ function QuantityStepper({ value, onIncrement, onDecrement, decrementLabel, incr
   );
 }
 
-function Header({ brand, itemCount, onCartOpen }) {
+function Header({ brand, itemCount, cartOpen, onCartToggle }) {
   return (
     <header className="site-header">
       <a className="brand" href="#menu" aria-label="صَح صِح">
@@ -103,7 +116,13 @@ function Header({ brand, itemCount, onCartOpen }) {
         <a className="phone-link" href="tel:+963947040585">
           {brand.phone || "+963 947 040 585"}
         </a>
-        <button className="cart-trigger" type="button" onClick={onCartOpen} aria-label="فتح السلة">
+        <button
+          className="cart-trigger"
+          type="button"
+          onClick={onCartToggle}
+          aria-label={cartOpen ? "إخفاء السلة" : "فتح السلة"}
+          aria-expanded={cartOpen}
+        >
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M7 3h10a2 2 0 0 1 2 2v16l-3-1.5L13 21l-3-1.5L7 21l-2-1V5a2 2 0 0 1 2-2Z" />
             <path d="M9 8h6M9 12h6M9 16h4" />
@@ -115,11 +134,18 @@ function Header({ brand, itemCount, onCartOpen }) {
   );
 }
 
-function SectionNav({ categories }) {
+function SectionNav({ categories, onSelectSection }) {
   return (
     <nav className="section-nav" aria-label="أقسام المنيو">
       {categories.map((category) => (
-        <a href={`#${category.sectionId}`} key={category.id}>
+        <a
+          href={`#${category.sectionId}`}
+          key={category.id}
+          onClick={(event) => {
+            event.preventDefault();
+            onSelectSection(category.sectionId);
+          }}
+        >
           <img src={`/${category.icon}`} alt="" aria-hidden="true" />
           <span className="nav-label">{category.name}</span>
         </a>
@@ -262,6 +288,7 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
         <span>الاسم</span>
         <input
           name="name"
+          type="text"
           value={form.name}
           onChange={onChange}
           autoComplete="name"
@@ -274,13 +301,14 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
         <span>رقم الهاتف</span>
         <input
           name="phone"
+          type="tel"
           value={form.phone}
           onChange={onChange}
           autoComplete="tel"
-          inputMode="tel"
+          inputMode="numeric"
           dir="ltr"
           aria-invalid={Boolean(formErrors.phone)}
-          placeholder="+963"
+          placeholder="09XXXXXXXX"
         />
         {formErrors.phone ? <small>{formErrors.phone}</small> : null}
       </label>
@@ -306,7 +334,6 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
     </form>
   );
 }
-
 function CartPanel({
   open,
   items,
@@ -436,6 +463,7 @@ export default function OrderingApp() {
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedOrder, setSubmittedOrder] = useState("");
+  const [backToTopVisible, setBackToTopVisible] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -474,6 +502,41 @@ export default function OrderingApp() {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [activeProductId]);
+
+  useEffect(() => {
+    const footer = document.querySelector(".site-footer");
+    let footerVisible = false;
+    let frame = 0;
+
+    function updateBackToTop() {
+      if (frame) return;
+
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        setBackToTopVisible(window.scrollY > 240 && !footerVisible);
+      });
+    }
+
+    let footerObserver = null;
+    if (footer && "IntersectionObserver" in window) {
+      footerObserver = new IntersectionObserver(([entry]) => {
+        footerVisible = entry.isIntersecting;
+        updateBackToTop();
+      });
+      footerObserver.observe(footer);
+    }
+
+    updateBackToTop();
+    window.addEventListener("scroll", updateBackToTop, { passive: true });
+    window.addEventListener("resize", updateBackToTop);
+
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      if (footerObserver) footerObserver.disconnect();
+      window.removeEventListener("scroll", updateBackToTop);
+      window.removeEventListener("resize", updateBackToTop);
+    };
+  }, []);
 
   const categories = menuData?.categories || [];
   const brand = menuData?.brand || {};
@@ -530,18 +593,36 @@ export default function OrderingApp() {
 
   function handleFormChange(event) {
     const { name, value } = event.target;
-    setForm((current) => ({ ...current, [name]: value }));
+    const nextValue = sanitizeFormField(name, value);
+    setForm((current) => ({ ...current, [name]: nextValue }));
     setFormErrors((current) => ({ ...current, [name]: "" }));
   }
 
   function validateForm() {
     const errors = {};
-    if (!form.name.trim()) errors.name = "الاسم مطلوب.";
-    if (!form.phone.trim()) errors.phone = "رقم الهاتف مطلوب.";
-    if (!form.address.trim()) errors.address = "العنوان مطلوب.";
+    const name = normalizeText(form.name);
+    const address = normalizeText(form.address);
+
+    if (!name) {
+      errors.name = "الاسم مطلوب.";
+    } else if (!TEXT_ONLY_PATTERN.test(name)) {
+      errors.name = "الاسم يجب أن يحتوي على أحرف فقط.";
+    }
+
+    if (!form.phone.trim()) {
+      errors.phone = "رقم الهاتف مطلوب.";
+    } else if (!/^09\d{8}$/.test(form.phone)) {
+      errors.phone = "أدخل رقم موبايل صحيح مثل 09XXXXXXXX.";
+    }
+
+    if (!address) {
+      errors.address = "العنوان مطلوب.";
+    } else if (!ADDRESS_TEXT_PATTERN.test(address)) {
+      errors.address = "العنوان يجب أن يحتوي على أحرف فقط.";
+    }
+
     return errors;
   }
-
   function handleSubmit(event) {
     event.preventDefault();
     if (isSubmitting || cartItems.length === 0) return;
@@ -565,16 +646,30 @@ export default function OrderingApp() {
     setCartOpen(false);
   }
 
+  function fixedOffset() {
+    const headerHeight = document.querySelector(".site-header")?.getBoundingClientRect().height || 0;
+    return headerHeight + 8;
+  }
+
+  function scrollToSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (!section) return;
+
+    const targetTop = window.scrollY + section.getBoundingClientRect().top - fixedOffset();
+    window.scrollTo({ top: Math.max(targetTop, 0), behavior: "smooth" });
+    window.history.replaceState(null, "", `#${sectionId}`);
+  }
+
   return (
     <>
-      <Header brand={brand} itemCount={itemCount} onCartOpen={() => setCartOpen(true)} />
+      <Header brand={brand} itemCount={itemCount} cartOpen={cartOpen} onCartToggle={() => setCartOpen((open) => !open)} />
       <main className="ordering-shell" id="menu">
         <div className="menu-page">
           {loadError ? <p className="menu-error">{loadError}</p> : null}
           {!menuData && !loadError ? <p className="menu-loading">جاري تحميل المنيو...</p> : null}
           {categories.length > 0 ? (
             <>
-              <SectionNav categories={categories} />
+              <SectionNav categories={categories} onSelectSection={scrollToSection} />
               <div className="menu-stack">
                 {categories.map((category) => (
                   <MenuSection
@@ -592,28 +687,39 @@ export default function OrderingApp() {
           ) : null}
         </div>
 
-        <CartPanel
-          open={cartOpen}
-          items={cartItems}
-          total={cartTotal}
-          form={form}
-          formErrors={formErrors}
-          isSubmitting={isSubmitting}
-          submittedOrder={submittedOrder}
-          onClose={() => setCartOpen(false)}
-          onIncrease={increaseProduct}
-          onDecrease={decreaseProduct}
-          onRemove={removeProduct}
-          onFormChange={handleFormChange}
-          onSubmit={handleSubmit}
-          onNewOrder={handleNewOrder}
-        />
+        <div className="cart-panel-slot">
+          <CartPanel
+            open={cartOpen}
+            items={cartItems}
+            total={cartTotal}
+            form={form}
+            formErrors={formErrors}
+            isSubmitting={isSubmitting}
+            submittedOrder={submittedOrder}
+            onClose={() => setCartOpen(false)}
+            onIncrease={increaseProduct}
+            onDecrease={decreaseProduct}
+            onRemove={removeProduct}
+            onFormChange={handleFormChange}
+            onSubmit={handleSubmit}
+            onNewOrder={handleNewOrder}
+          />
+        </div>
       </main>
 
       <button className={`floating-cart ${itemCount > 0 ? "is-visible" : ""}`} type="button" onClick={() => setCartOpen(true)}>
         <span>السلة</span>
         <strong>{itemCount}</strong>
         <b>{formatTotal(cartTotal)}</b>
+      </button>
+
+      <button
+        className={`back-to-top ${backToTopVisible ? "is-visible" : ""}`}
+        type="button"
+        aria-label="العودة إلى أعلى الصفحة"
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      >
+        ↑
       </button>
 
       {cartOpen ? <button className="cart-backdrop" type="button" aria-label="إغلاق السلة" onClick={() => setCartOpen(false)} /> : null}
@@ -632,3 +738,8 @@ export default function OrderingApp() {
     </>
   );
 }
+
+
+
+
+

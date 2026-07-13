@@ -1,16 +1,16 @@
 # Sahseh Ordering
 
-Customer ordering frontend for Sahseh.
+Customer ordering system workspace for Sahseh.
 
-This repo is a separate Next.js app from the static QR menu in `../sahseh_menu`. Shared source menu data and visual assets still live in `../sahseh_source`.
+This repo is separate from the static QR menu in `../sahseh_menu`. Shared source menu data and visual assets still live in `../sahseh_source`.
 
 ## Current Status
 
-The frontend foundation is built.
+The frontend foundation is built as a React app with Vite. A FastAPI backend scaffold is included for the future ordering API.
 
 Implemented:
 
-- Next.js app.
+- React + Vite frontend.
 - Arabic RTL interface.
 - Shared Sahseh logo, red/cream styling, background pattern, and category icons.
 - Menu loaded from `public/data/menu.json`, synced from `../sahseh_source/data/menu.json`.
@@ -23,6 +23,7 @@ Implemented:
 - Cart total.
 - Checkout form for name, phone, address, and notes.
 - Mock order confirmation number.
+- FastAPI backend scaffold with CORS and health/order placeholder routes.
 
 Not implemented yet:
 
@@ -46,17 +47,31 @@ public/assets/beauty/
 public/assets/img/products/
 ```
 
+## Project Structure
+
+- `src/` - React frontend source.
+- `public/` - synced deploy-copy menu data and shared assets.
+- `backend/` - FastAPI service scaffold.
+- `tests/order-flow.spec.js` - Playwright smoke test.
+
 ## Local Development
+
+Frontend:
 
 ```powershell
 npm install
 npm run dev
 ```
 
-Open:
+Open the local Vite URL shown in the terminal, usually `http://127.0.0.1:5173`.
 
-```text
-http://127.0.0.1:3000
+Backend:
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r backend\requirements.txt
+uvicorn backend.app.main:app --reload
 ```
 
 ## Validation
@@ -66,7 +81,7 @@ npm run build
 npm test
 ```
 
-The Playwright smoke test checks that the app renders 13 categories, 103 products, the desktop cart, and the mobile add-to-cart checkout flow.
+The Playwright smoke test starts the Vite dev server automatically and checks that the app renders 13 categories, 103 products, the desktop cart, and the mobile add-to-cart checkout flow.
 
 ## Backend Later
 
@@ -78,3 +93,4 @@ After the frontend flow is stable, add backend/database work:
 - Admin login.
 - Order status updates.
 - Delivery notification or delivery integration.
+
