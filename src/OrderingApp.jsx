@@ -1,7 +1,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-const MENU_SOURCE = "/data/menu.json";
+const BASE_URL = import.meta.env.BASE_URL || "/";
+const MENU_SOURCE = assetUrl("data/menu.json");
 const INGREDIENT_FALLBACK = "سيتم إضافة المكونات لاحقا.";
 const EMPTY_FORM = {
   name: "",
@@ -11,6 +12,13 @@ const EMPTY_FORM = {
 };
 const PHONE_LENGTH = 10;
 const TEXT_ONLY_PATTERN = /^[\p{L}\p{M}\s]+$/u;
+function assetUrl(path) {
+  if (!path) return "";
+  if (/^(?:[a-z][a-z\d+\-.]*:)?\/\//i.test(path)) return path;
+
+  const normalizedBase = BASE_URL.endsWith("/") ? BASE_URL : `${BASE_URL}/`;
+  return `${normalizedBase}${String(path).replace(/^\/+/, "")}`;
+}
 
 function sanitizeFormField(name, value) {
   if (name === "phone") return value.replace(/\D/g, "").slice(0, PHONE_LENGTH);
@@ -104,7 +112,7 @@ function Header({ brand, itemCount, cartOpen, onCartToggle }) {
   return (
     <header className="site-header">
       <a className="brand" href="#menu" aria-label="صَح صِح">
-        <img src="/assets/brand/brand-art.png" alt="صح صح" className="brand-logo" />
+        <img src={assetUrl("assets/brand/brand-art.png")} alt="صح صح" className="brand-logo" />
         <div className="brand-text">
           <h1>{brand.name || "صَح صِح"}</h1>
           <p className="brand-statement">{brand.statement || "بيتك ومطرحك"}</p>
@@ -144,7 +152,7 @@ function SectionNav({ categories, onSelectSection }) {
             onSelectSection(category.sectionId);
           }}
         >
-          <img src={`/${category.icon}`} alt="" aria-hidden="true" />
+          <img src={assetUrl(category.icon)} alt="" aria-hidden="true" />
           <span className="nav-label">{category.name}</span>
         </a>
       ))}
@@ -184,7 +192,7 @@ function MenuSection({ category, cartQuantities, onOpenProduct, onAddProduct, on
     <article className="menu-section" id={category.sectionId}>
       <h2>
         <span className="section-icon">
-          <img src={`/${category.icon}`} alt="" aria-hidden="true" />
+          <img src={assetUrl(category.icon)} alt="" aria-hidden="true" />
         </span>
         <span>{category.name}</span>
       </h2>
@@ -224,7 +232,7 @@ function ProductModal({ product, quantity, fallbackIngredients, onClose, onAdd, 
         </div>
         <div className="product-modal-media">
           {product.image ? (
-            <img className="product-modal-image" src={`/${product.image}`} alt={product.name} loading="lazy" decoding="async" />
+            <img className="product-modal-image" src={assetUrl(product.image)} alt={product.name} loading="lazy" decoding="async" />
           ) : (
             <div className="product-modal-image-placeholder">
               <span>صورة المنتج</span>
