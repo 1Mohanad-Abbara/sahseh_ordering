@@ -176,17 +176,10 @@ function SectionNav({ categories, onSelectSection }) {
   return (
     <nav className="section-nav" aria-label="أقسام المنيو">
       {categories.map((category) => (
-        <a
-          href={`#${category.sectionId}`}
-          key={category.id}
-          onClick={(event) => {
-            event.preventDefault();
-            onSelectSection(category.sectionId);
-          }}
-        >
+        <button type="button" key={category.id} onClick={() => onSelectSection(category.sectionId)}>
           <img src={assetUrl(category.icon)} alt="" aria-hidden="true" />
           <span className="nav-label">{category.name}</span>
-        </a>
+        </button>
       ))}
     </nav>
   );
@@ -618,7 +611,7 @@ export default function OrderingApp() {
     if (!sectionId) return undefined;
 
     const timeout = window.setTimeout(() => {
-      scrollToSection(sectionId, "auto", false);
+      scrollToSection(sectionId, "auto");
     }, 50);
 
     return () => window.clearTimeout(timeout);
@@ -712,13 +705,16 @@ export default function OrderingApp() {
     return headerHeight + 8;
   }
 
-  function scrollToSection(sectionId, behavior = "smooth", updateHash = true) {
+  function scrollToSection(sectionId, behavior = "smooth") {
     const section = document.getElementById(sectionId);
     if (!section) return;
 
     const targetTop = window.scrollY + section.getBoundingClientRect().top - fixedOffset();
     window.scrollTo({ top: Math.max(targetTop, 0), behavior });
-    if (updateHash) window.history.replaceState(null, "", `#${sectionId}`);
+
+    if (/^#section-\d+$/i.test(window.location.hash)) {
+      window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+    }
   }
 
   return (

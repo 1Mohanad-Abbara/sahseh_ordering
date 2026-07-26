@@ -15,10 +15,16 @@ test("desktop renders the ordering menu, aligns hash sections, toggles cart, kee
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/#section-06");
 
-  await expect(page.locator(".section-nav a")).toHaveCount(13);
+  await expect(page.locator(".section-nav button")).toHaveCount(13);
+
   await expect(page.locator(".menu-section")).toHaveCount(13);
   await expect(page.locator(".product-list li")).toHaveCount(103);
   await expectSectionAligned(page, "section-06");
+  await expect(page).not.toHaveURL(/#section-\d+$/);
+  await expect(page.locator(".section-nav button").first()).toHaveCSS("cursor", "pointer");
+  await page.locator(".theme-toggle").click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await expect(page.locator(".cart-trigger strong")).toHaveCSS("background-color", "rgb(255, 255, 255)");
 
   await expect(page.locator(".cart-panel")).not.toHaveClass(/is-open/);
   await page.locator(".cart-trigger").click();
@@ -39,8 +45,9 @@ test("desktop renders the ordering menu, aligns hash sections, toggles cart, kee
   await expect(page.locator('input[name="phone"]')).toHaveValue("0947040585");
   await expect(page.locator('textarea[name="address"]')).toHaveValue("Homs 123, floor #5");
 
-  await page.locator('.section-nav a[href="#section-08"]').click();
+  await page.locator(".section-nav button", { hasText: "بان كيك" }).click();
   await expectSectionAligned(page, "section-08");
+  await expect(page).not.toHaveURL(/#section-\d+$/);
 
   const cartBefore = await page.locator(".cart-panel").boundingBox();
   await page.mouse.wheel(0, 1600);

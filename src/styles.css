@@ -279,14 +279,14 @@ h1 {
   outline-color: rgba(255, 255, 255, 0.72);
 }
 
-:root[data-theme="light"] .section-nav a {
+:root[data-theme="light"] .section-nav button {
   border-color: rgba(237, 31, 39, 0.2);
   background: #fff;
   color: var(--brand-red-dark);
   box-shadow: 0 8px 22px rgba(80, 25, 20, 0.08);
 }
 
-:root[data-theme="light"] .section-nav a:focus-visible,
+:root[data-theme="light"] .section-nav button:focus-visible,
 :root[data-theme="light"] .product-list li:focus-visible {
   outline-color: rgba(237, 31, 39, 0.42);
 }
@@ -499,7 +499,7 @@ h1 {
   padding: 0.55rem 0 0.7rem;
 }
 
-.section-nav a {
+.section-nav button {
   flex: 0 1 calc((100% - 0.45rem) / 2);
   min-height: 2.45rem;
   display: grid;
@@ -518,7 +518,7 @@ h1 {
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
 }
 
-.section-nav a img {
+.section-nav button img {
   width: 1.55rem;
   height: 1.55rem;
   border: 2px solid;
@@ -533,11 +533,11 @@ h1 {
 }
 
 
-.section-nav a:focus {
+.section-nav button:focus {
   outline: none;
 }
 
-.section-nav a:focus-visible {
+.section-nav button:focus-visible {
   outline: 2px solid var(--accent-line-strong);
   outline-offset: 2px;
 }
@@ -854,7 +854,7 @@ body.modal-open {
 }
 
 @media (min-width: 560px) {
-  .section-nav a {
+  .section-nav button {
     flex-basis: calc((100% - 0.9rem) / 3);
   }
 }
@@ -873,7 +873,7 @@ body.modal-open {
   }
 
 
-  .section-nav a {
+  .section-nav button {
     flex-basis: calc((100% - 1.8rem) / 5);
   }
 
@@ -960,13 +960,13 @@ body.modal-open {
     width: min(100% - 0.7rem, 760px);
   }
 
-  .section-nav a {
+  .section-nav button {
     min-height: 2rem;
     padding-inline: 0.58rem;
     font-size: 0.8rem;
   }
 
-  .section-nav a img {
+  .section-nav button img {
     width: 1.35rem;
     height: 1.35rem;
   }
@@ -1063,6 +1063,14 @@ button {
   color: inherit;
 }
 
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
 :root {
   --soft-red: rgba(237, 28, 35, 0.12);
   --success: #4ddf9a;
@@ -1141,6 +1149,11 @@ button {
   border-color: rgba(255, 255, 255, 0.36);
   background: rgba(255, 255, 255, 0.14);
   color: #fff;
+}
+
+:root[data-theme="light"] .cart-trigger strong {
+  background: #fff;
+  color: var(--brand-red-dark);
 }
 
 :root[data-theme="light"] .cart-trigger:focus-visible,
