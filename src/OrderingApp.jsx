@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from "react";
 
 const BASE_URL = import.meta.env.BASE_URL || "/";
@@ -11,7 +10,19 @@ const EMPTY_FORM = {
   notes: ""
 };
 const PHONE_LENGTH = 10;
+const THEME_STORAGE_KEY = "sahseh-menu-theme";
 const TEXT_ONLY_PATTERN = /^[\p{L}\p{M}\s]+$/u;
+
+function savedTheme() {
+  if (typeof window === "undefined") return "dark";
+
+  try {
+    return localStorage.getItem(THEME_STORAGE_KEY) === "light" ? "light" : "dark";
+  } catch (error) {
+    return "dark";
+  }
+}
+
 function assetUrl(path) {
   if (!path) return "";
   if (/^(?:[a-z][a-z\d+\-.]*:)?\/\//i.test(path)) return path;
@@ -108,7 +119,30 @@ function QuantityStepper({ value, onIncrement, onDecrement, decrementLabel, incr
   );
 }
 
-function Header({ brand, itemCount, cartOpen, onCartToggle }) {
+function ThemeToggle({ theme, onToggle }) {
+  const isLight = theme === "light";
+
+  return (
+    <button
+      className="theme-toggle"
+      type="button"
+      onClick={onToggle}
+      aria-pressed={isLight}
+      aria-label={isLight ? "تفعيل النمط الداكن" : "تفعيل النمط الفاتح"}
+      title={isLight ? "النمط الداكن" : "النمط الفاتح"}
+    >
+      <svg className="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M21 14.4A8.2 8.2 0 0 1 9.6 3a7 7 0 1 0 11.4 11.4Z" />
+      </svg>
+      <svg className="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2.2M12 19.8V22M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2 12h2.2M19.8 12H22M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6" />
+      </svg>
+    </button>
+  );
+}
+
+function Header({ brand, itemCount, cartOpen, onCartToggle, theme, onThemeToggle }) {
   return (
     <header className="site-header">
       <a className="brand" href="#menu" aria-label="صَح صِح">
@@ -119,9 +153,7 @@ function Header({ brand, itemCount, cartOpen, onCartToggle }) {
         </div>
       </a>
       <div className="header-actions">
-        <a className="phone-link" href="tel:+963947040585">
-          {brand.phone || "+963 947 040 585"}
-        </a>
+        <ThemeToggle theme={theme} onToggle={onThemeToggle} />
         <button
           className="cart-trigger"
           type="button"
@@ -340,6 +372,7 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
     </form>
   );
 }
+
 function CartPanel({
   open,
   items,
@@ -427,7 +460,7 @@ function Footer({ brand }) {
         <span>{brand.statement || "بيتك ومطرحك"}</span>
       </div>
       <div className="footer-info">
-        <a href="tel:+963947040585">{brand.phone || "+963 947 040 585"}</a>
+        <p className="footer-phone"><a href="tel:+963947040585">{brand.phone || "+963 947 040 585"}</a></p>
         <p>{brand.location || "حمص - الميدان - حديقة جامع الدروبي مقابل حلويات أبو اللبن"}</p>
       </div>
       <div className="footer-actions" aria-label="روابط التواصل والموقع">
@@ -462,6 +495,7 @@ function Footer({ brand }) {
 export default function OrderingApp() {
   const [menuData, setMenuData] = useState(null);
   const [loadError, setLoadError] = useState("");
+  const [theme, setTheme] = useState(savedTheme);
   const [cart, setCart] = useState({});
   const [activeProductId, setActiveProductId] = useState(null);
   const [cartOpen, setCartOpen] = useState(false);
@@ -470,6 +504,15 @@ export default function OrderingApp() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedOrder, setSubmittedOrder] = useState("");
   const [backToTopVisible, setBackToTopVisible] = useState(false);
+
+  useEffect(() => {
+    const nextTheme = theme === "light" ? "light" : "dark";
+    document.documentElement.dataset.theme = nextTheme;
+
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+    } catch (error) {}
+  }, [theme]);
 
   useEffect(() => {
     let alive = true;
@@ -568,7 +611,6 @@ export default function OrderingApp() {
 
   const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-
   useEffect(() => {
     if (categories.length === 0) return undefined;
 
@@ -581,6 +623,7 @@ export default function OrderingApp() {
 
     return () => window.clearTimeout(timeout);
   }, [categories.length]);
+
   function setProductQuantity(productId, nextQuantity) {
     setSubmittedOrder("");
     setCart((current) => {
@@ -677,9 +720,17 @@ export default function OrderingApp() {
     window.scrollTo({ top: Math.max(targetTop, 0), behavior });
     if (updateHash) window.history.replaceState(null, "", `#${sectionId}`);
   }
+
   return (
     <>
-      <Header brand={brand} itemCount={itemCount} cartOpen={cartOpen} onCartToggle={() => setCartOpen((open) => !open)} />
+      <Header
+        brand={brand}
+        itemCount={itemCount}
+        cartOpen={cartOpen}
+        onCartToggle={() => setCartOpen((open) => !open)}
+        theme={theme}
+        onThemeToggle={() => setTheme((current) => (current === "light" ? "dark" : "light"))}
+      />
       <main className="ordering-shell" id="menu">
         <div className="menu-page">
           {loadError ? <p className="menu-error">{loadError}</p> : null}
@@ -755,10 +806,3 @@ export default function OrderingApp() {
     </>
   );
 }
-
-
-
-
-
-
-
