@@ -34,7 +34,18 @@ test("desktop renders the ordering menu, aligns hash sections, toggles cart, kee
   await page.locator(".product-list li").first().locator(".add-button").click();
   await page.locator('input[name="name"]').fill("Test");
   await page.locator('input[name="phone"]').fill("0947040585");
-  await page.locator('textarea[name="address"]').fill("Homs 123, floor #5");
+  const neighborhoodInput = page.locator('input[name="neighborhoodSearch"]');
+  const streetInput = page.locator('textarea[name="streetAddress"]');
+  await neighborhoodInput.click();
+  await expect(page.locator(".neighborhood-option")).toHaveCount(18);
+  const neighborhoodOptions = (await page.locator(".neighborhood-option").allTextContents()).map((text) => text.trim());
+  expect(neighborhoodOptions).toEqual([...neighborhoodOptions].sort((first, second) => first.localeCompare(second, "ar-SY")));
+  await neighborhoodInput.fill("عر");
+  await expect(page.locator(".neighborhood-option")).toHaveText("وعر");
+  await neighborhoodInput.click();
+  await page.locator(".neighborhood-option", { hasText: "وعر" }).click();
+  await streetInput.fill("Homs 123, floor #5");
+  await page.locator('input[name="deliveryCompany"][value="5g"]').check();
 
   await page.locator(".cart-trigger").click();
   await expect(page.locator(".cart-panel")).not.toHaveClass(/is-open/);
@@ -43,7 +54,9 @@ test("desktop renders the ordering menu, aligns hash sections, toggles cart, kee
   await expect(page.locator(".cart-panel")).toContainText("شاي");
   await expect(page.locator('input[name="name"]')).toHaveValue("Test");
   await expect(page.locator('input[name="phone"]')).toHaveValue("0947040585");
-  await expect(page.locator('textarea[name="address"]')).toHaveValue("Homs 123, floor #5");
+  await expect(neighborhoodInput).toHaveValue("وعر");
+  await expect(streetInput).toHaveValue("Homs 123, floor #5");
+  await expect(page.locator('input[name="deliveryCompany"][value="5g"]')).toBeChecked();
 
   await page.locator(".section-nav button", { hasText: "بان كيك" }).click();
   await expectSectionAligned(page, "section-08");
@@ -64,7 +77,7 @@ test("desktop renders the ordering menu, aligns hash sections, toggles cart, kee
   await page.waitForFunction(() => window.scrollY < 5);
 });
 
-test("mobile handles validation, address text, add to cart, and checkout confirmation", async ({ page }) => {
+test("mobile handles validation, delivery address, add to cart, and checkout confirmation", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
 
@@ -78,7 +91,8 @@ test("mobile handles validation, address text, add to cart, and checkout confirm
 
   const nameInput = page.locator('input[name="name"]');
   const phoneInput = page.locator('input[name="phone"]');
-  const addressInput = page.locator('textarea[name="address"]');
+  const neighborhoodInput = page.locator('input[name="neighborhoodSearch"]');
+  const streetInput = page.locator('textarea[name="streetAddress"]');
 
   await expect(phoneInput).toHaveAttribute("placeholder", "09XXXXXXXX");
 
@@ -86,14 +100,21 @@ test("mobile handles validation, address text, add to cart, and checkout confirm
   await expect(nameInput).toHaveValue("Test");
 
   await phoneInput.fill("0847040585");
-  await addressInput.fill("Homs 123, floor #5");
-  await expect(addressInput).toHaveValue("Homs 123, floor #5");
+  await neighborhoodInput.fill("عر");
+  await expect(page.locator(".neighborhood-option")).toHaveText("وعر");
+  await streetInput.fill("Homs 123, floor #5");
+  await expect(streetInput).toHaveValue("Homs 123, floor #5");
   await page.locator(".checkout-submit").click();
   await expect(page.locator(".checkout-form")).toContainText("09XXXXXXXX");
+  await expect(page.locator(".checkout-form")).toContainText("اختر المنطقة من القائمة");
+  await expect(page.locator(".checkout-form")).toContainText("اختر شركة توصيل واحدة");
 
   await phoneInput.fill("09abc47040585");
   await expect(phoneInput).toHaveValue("0947040585");
 
+  await neighborhoodInput.click();
+  await page.locator(".neighborhood-option", { hasText: "وعر" }).click();
+  await page.locator('input[name="deliveryCompany"][value="fast-delivery"]').check();
   await page.locator('textarea[name="notes"]').fill("Floor 2 #5, near door @ 9pm");
   await page.locator(".checkout-submit").click();
   await expect(page.locator(".order-confirmation")).toContainText("SS-");

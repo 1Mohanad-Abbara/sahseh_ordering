@@ -1514,18 +1514,20 @@ button:disabled {
   gap: 0.7rem;
 }
 
-.checkout-form label {
+.checkout-form .field-label,
+.delivery-field {
   display: grid;
   gap: 0.28rem;
 }
 
-.checkout-form label > span {
+.checkout-form .field-label > span,
+.delivery-field legend {
   color: var(--brand-red-dark);
   font-size: 0.9rem;
   font-weight: 900;
 }
 
-.checkout-form input,
+.checkout-form input:not([type="radio"]),
 .checkout-form textarea {
   width: 100%;
   border: 1px solid var(--line);
@@ -1537,20 +1539,129 @@ button:disabled {
   resize: vertical;
 }
 
-:root[data-theme="light"] .checkout-form input,
+:root[data-theme="light"] .checkout-form input:not([type="radio"]),
 :root[data-theme="light"] .checkout-form textarea {
   background: #fff;
 }
 
-.checkout-form input:focus,
+.checkout-form input:not([type="radio"]):focus,
 .checkout-form textarea:focus {
   outline: 2px solid var(--accent-line-strong);
   border-color: var(--accent-line-strong);
 }
 
-.checkout-form input[aria-invalid="true"],
+.checkout-form input:not([type="radio"])[aria-invalid="true"],
 .checkout-form textarea[aria-invalid="true"] {
   border-color: var(--brand-red);
+}
+
+.delivery-field {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+
+.neighborhood-field,
+.neighborhood-picker {
+  position: relative;
+}
+
+.neighborhood-list {
+  position: absolute;
+  inset-block-start: calc(100% + 0.35rem);
+  inset-inline: 0;
+  z-index: 85;
+  max-height: 12rem;
+  overflow-y: auto;
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.3rem;
+  border: 1px solid var(--accent-line);
+  border-radius: 0.65rem;
+  background: var(--panel);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.34);
+}
+
+.neighborhood-option,
+.neighborhood-empty {
+  width: 100%;
+  min-height: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--ink);
+  padding: 0.5rem 0.6rem;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 900;
+  text-align: start;
+}
+
+.neighborhood-option[aria-selected="true"] {
+  background: rgba(237, 28, 35, 0.18);
+  color: var(--brand-red-dark);
+}
+
+.neighborhood-empty {
+  color: var(--muted);
+}
+
+.delivery-options {
+  display: grid;
+  gap: 0.42rem;
+}
+
+.delivery-option {
+  min-height: 2.55rem;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: var(--panel-soft);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.delivery-option input {
+  flex: 0 0 auto;
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
+  accent-color: var(--brand-red);
+}
+
+.delivery-option span {
+  min-width: 0;
+  color: inherit;
+  font-size: 0.92rem;
+  font-weight: 900;
+}
+
+.delivery-option.is-selected {
+  border-color: var(--accent-line-strong);
+  background: rgba(237, 28, 35, 0.14);
+  box-shadow: inset -3px 0 0 var(--brand-red);
+}
+
+.delivery-field[aria-invalid="true"] .delivery-option:not(.is-selected) {
+  border-color: rgba(237, 28, 35, 0.35);
+}
+
+:root[data-theme="light"] .neighborhood-list,
+:root[data-theme="light"] .delivery-option {
+  background: #fff;
+}
+
+:root[data-theme="light"] .neighborhood-option[aria-selected="true"],
+:root[data-theme="light"] .delivery-option.is-selected {
+  background: #fff1f1;
+  color: var(--brand-red-dark);
 }
 
 .checkout-form small {
@@ -1664,6 +1775,8 @@ button:disabled {
   .icon-button,
   .footer-action,
   .floating-cart,
+  .delivery-option,
+  .neighborhood-option,
   .back-to-top {
     transition:
       opacity 160ms ease,
@@ -1742,6 +1855,18 @@ button:disabled {
     transform: translateY(-2px);
   }
 
+
+  .delivery-option:hover,
+  .neighborhood-option:hover {
+    border-color: var(--accent-line-strong);
+    background: rgba(237, 28, 35, 0.16);
+    box-shadow: 0 10px 22px rgba(237, 28, 35, 0.14);
+  }
+
+  .delivery-option:hover {
+    transform: translateY(-1px);
+  }
+
   .back-to-top.is-visible:hover {
     transform: translateY(0) scale(1.08);
   }
@@ -1783,7 +1908,15 @@ button:disabled {
     color: var(--brand-red-dark);
     box-shadow: 0 10px 22px rgba(120, 15, 18, 0.12);
   }
+
+  :root[data-theme="light"] .delivery-option:hover,
+  :root[data-theme="light"] .neighborhood-option:hover {
+    background: #fff2f2;
+    color: var(--brand-red-dark);
+    box-shadow: 0 10px 22px rgba(120, 15, 18, 0.1);
+  }
 }
+
 .menu-loading,
 .menu-error {
   margin: 1rem 0;

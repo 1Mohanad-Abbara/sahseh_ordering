@@ -51,7 +51,7 @@ As of this review, shared menu data, brand images, background pattern, icons, an
 - `public/data/menu.json` - synced deploy copy from `../sahseh_source/data/menu.json`.
 - `public/assets/` - synced deploy copy of shared logo/background/icons/product-image directory.
 - `backend/` - FastAPI scaffold for future real order API work.
-- `tests/order-flow.spec.js` - browser smoke coverage for render counts, section alignment, URL cleanliness, cart, checkout, cursor, light-mode badge, and footer phone-link boundary.
+- `tests/order-flow.spec.js` - browser smoke coverage for render counts, section alignment, URL cleanliness, cart, checkout delivery fields, cursor, light-mode badge, and footer phone-link boundary.
 
 ## Runtime Behavior
 
@@ -63,9 +63,17 @@ As of this review, shared menu data, brand images, background pattern, icons, an
 6. Product rows open the product modal when the product name/price area is clicked.
 7. Add buttons and plus/minus steppers update the cart. Product quantities are clamped from 0 to 99.
 8. The cart can open from the header cart button or mobile floating cart. Desktop uses a fixed cart panel; mobile uses a bottom sheet with backdrop.
-9. Checkout fields are name, phone, address, and optional notes. Phone input is numeric and must match `09XXXXXXXX`. Name accepts letters/spaces only.
+9. Checkout fields are name, phone, required searchable neighborhood, required street/nearest-landmark text, required delivery company, and optional notes. Phone input is numeric and must match `09XXXXXXXX`. Name accepts letters/spaces only.
 10. Submit is mocked with an `SS-######` confirmation number. There is no real order API call yet.
 11. Back-to-top appears after scrolling past 240px and hides while the footer is visible.
+
+## Checkout Delivery Fields
+
+- Neighborhood selection is required, sorted with Arabic locale ordering, and searchable by any substring. For example, typing `عر` should show `وعر`.
+- Current neighborhoods are: ادخار، انشائات، باب سباع، بابا عمرو، جميدية، جورة الشياح، حضارة، حمرا، خالدية، دبلان، شبابية، غوطة، قصور، كرم الشامي، كرم اللوز، ميدان، وادي الذهب، وعر.
+- Street/nearest-landmark text is required and is labeled `الشارع، أقرب علامة`.
+- Delivery company selection is required and must be exactly one of `5G`, `Tbsher - تبشر`, or `Fast Delivery`.
+- `src/OrderingApp.jsx` keeps a delivery area data structure with a per-company `deliveryPrices` slot for every neighborhood. Prices are currently `null` until the company price table is provided.
 
 ## Theme And Visual Contract
 
@@ -75,6 +83,8 @@ The ordering app should match `../sahseh_menu` for shared visual surfaces:
 - Light mode is controlled by `html[data-theme="light"]`.
 - Theme preference is stored in `localStorage["sahseh-menu-theme"]`, shared with the static menu.
 - Header, footer, logo treatment, menu cards, section controls, section icons, price slots, product modal shell, and back-to-top button should stay visually aligned with `../sahseh_menu`.
+- Desktop mouse hover effects should stay aligned with `../sahseh_menu` for section controls, product rows, price slots, theme/footer controls, and back-to-top behavior.
+- Ordering-only controls such as cart buttons, add/order buttons, quantity icon buttons, and the mobile floating cart should use the same desktop hover feel while preserving ordering layout.
 - The back-to-top button should keep the same colors on hover in both themes and only scale slightly on desktop mouse hover.
 - The header cart count badge must be a white circle with red text in light mode.
 - Buttons should show the normal pointer cursor on hover when enabled.
@@ -145,10 +155,11 @@ Current Playwright expectations include:
 - 104 product rows.
 - Category buttons scroll to sections without leaving `#section-XX` in the URL.
 - Enabled buttons have pointer cursor.
+- Desktop hover effects work for category buttons, product rows, price slots, ordering buttons, icon buttons, and footer/header controls in dark and light mode.
 - Back-to-top hover keeps the same colors in light and dark mode and scales slightly on desktop hover.
 - Light-mode header cart count badge is white.
-- Desktop cart opens, closes, and preserves entered checkout data.
-- Mobile add-to-cart and checkout validation work.
+- Desktop cart opens, closes, and preserves entered checkout data, including selected neighborhood, street/nearest landmark, and delivery company.
+- Mobile add-to-cart and checkout validation work, including required neighborhood selection, street/nearest landmark, and exactly one delivery company.
 - Footer phone text link is limited to the phone text area.
 
 For shared data/assets, also run the source validation script from `../sahseh_source` after syncing source changes.

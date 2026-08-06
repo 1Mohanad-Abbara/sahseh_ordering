@@ -6,9 +6,44 @@ const INGREDIENT_FALLBACK = "سيتم إضافة المكونات لاحقا.";
 const EMPTY_FORM = {
   name: "",
   phone: "",
-  address: "",
+  neighborhood: "",
+  neighborhoodSearch: "",
+  streetAddress: "",
+  deliveryCompany: "",
   notes: ""
 };
+const DELIVERY_COMPANIES = [
+  { id: "5g", name: "5G" },
+  { id: "tbsher", name: "Tbsher - تبشر" },
+  { id: "fast-delivery", name: "Fast Delivery" }
+];
+const NEIGHBORHOODS = [
+  "حمرا",
+  "غوطة",
+  "دبلان",
+  "كرم الشامي",
+  "كرم اللوز",
+  "وعر",
+  "وادي الذهب",
+  "جورة الشياح",
+  "قصور",
+  "خالدية",
+  "انشائات",
+  "ميدان",
+  "جميدية",
+  "باب سباع",
+  "حضارة",
+  "ادخار",
+  "شبابية",
+  "بابا عمرو"
+].sort((first, second) => first.localeCompare(second, "ar-SY"));
+const DELIVERY_AREAS = NEIGHBORHOODS.map((name) => ({
+  name,
+  deliveryPrices: DELIVERY_COMPANIES.reduce((prices, company) => {
+    prices[company.id] = null;
+    return prices;
+  }, {})
+}));
 const PHONE_LENGTH = 10;
 const THEME_STORAGE_KEY = "sahseh-menu-theme";
 const TEXT_ONLY_PATTERN = /^[\p{L}\p{M}\s]+$/u;
@@ -39,6 +74,24 @@ function sanitizeFormField(name, value) {
 
 function normalizeText(value) {
   return value.replace(/\s+/g, " ").trim();
+}
+
+function normalizeSearchValue(value) {
+  return normalizeText(String(value || ""))
+    .normalize("NFKD")
+    .replace(/[\u064B-\u065F\u0670]/g, "")
+    .replace(/[إأآا]/g, "ا")
+    .replace(/ى/g, "ي")
+    .replace(/ة/g, "ه")
+    .toLocaleLowerCase("ar-SY");
+}
+
+function isKnownNeighborhood(value) {
+  return DELIVERY_AREAS.some((area) => area.name === value);
+}
+
+function isKnownDeliveryCompany(value) {
+  return DELIVERY_COMPANIES.some((company) => company.id === value);
 }
 
 function orderedItems(items = []) {
@@ -313,9 +366,38 @@ function CartLine({ item, onIncrease, onDecrease, onRemove }) {
 }
 
 function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disabled }) {
+  const [neighborhoodOpen, setNeighborhoodOpen] = useState(false);
+  const filteredNeighborhoods = useMemo(() => {
+    const query = normalizeSearchValue(form.neighborhoodSearch);
+    if (!query) return DELIVERY_AREAS;
+    return DELIVERY_AREAS.filter((area) => normalizeSearchValue(area.name).includes(query));
+  }, [form.neighborhoodSearch]);
+
+  function selectNeighborhood(name) {
+    onChange({ target: { name: "neighborhoodSearch", value: name } });
+    setNeighborhoodOpen(false);
+  }
+
+  function handleNeighborhoodBlur(event) {
+    if (!event.currentTarget.contains(event.relatedTarget)) {
+      setNeighborhoodOpen(false);
+    }
+  }
+
+  function handleNeighborhoodKeyDown(event) {
+    if (event.key === "Enter" && filteredNeighborhoods.length > 0) {
+      event.preventDefault();
+      selectNeighborhood(filteredNeighborhoods[0].name);
+    }
+
+    if (event.key === "Escape") {
+      setNeighborhoodOpen(false);
+    }
+  }
+
   return (
     <form className="checkout-form" onSubmit={onSubmit} noValidate>
-      <label>
+      <label className="field-label">
         <span>الاسم</span>
         <input
           name="name"
@@ -328,7 +410,7 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
         />
         {formErrors.name ? <small>{formErrors.name}</small> : null}
       </label>
-      <label>
+      <label className="field-label">
         <span>رقم الهاتف</span>
         <input
           name="phone"
@@ -343,19 +425,78 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
         />
         {formErrors.phone ? <small>{formErrors.phone}</small> : null}
       </label>
-      <label>
-        <span>العنوان</span>
+      <label className="field-label neighborhood-field">
+        <span>المنطقة</span>
+        <div className="neighborhood-picker" onFocus={() => setNeighborhoodOpen(true)} onBlur={handleNeighborhoodBlur}>
+          <input
+            name="neighborhoodSearch"
+            type="text"
+            value={form.neighborhoodSearch}
+            onChange={onChange}
+            onKeyDown={handleNeighborhoodKeyDown}
+            autoComplete="off"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded={neighborhoodOpen}
+            aria-controls="neighborhood-options"
+            aria-invalid={Boolean(formErrors.neighborhood)}
+            placeholder="ابحث عن المنطقة"
+          />
+          {neighborhoodOpen ? (
+            <div className="neighborhood-list" id="neighborhood-options" role="listbox">
+              {filteredNeighborhoods.length > 0 ? (
+                filteredNeighborhoods.map((area) => (
+                  <button
+                    className="neighborhood-option"
+                    type="button"
+                    key={area.name}
+                    role="option"
+                    aria-selected={form.neighborhood === area.name}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => selectNeighborhood(area.name)}
+                  >
+                    {area.name}
+                  </button>
+                ))
+              ) : (
+                <span className="neighborhood-empty">لا توجد منطقة مطابقة</span>
+              )}
+            </div>
+          ) : null}
+        </div>
+        {formErrors.neighborhood ? <small>{formErrors.neighborhood}</small> : null}
+      </label>
+      <label className="field-label">
+        <span>الشارع، أقرب علامة</span>
         <textarea
-          name="address"
-          value={form.address}
+          name="streetAddress"
+          value={form.streetAddress}
           onChange={onChange}
           rows={3}
-          aria-invalid={Boolean(formErrors.address)}
-          placeholder="المنطقة، الشارع، أقرب علامة"
+          aria-invalid={Boolean(formErrors.streetAddress)}
+          placeholder="اكتب الشارع وأقرب علامة"
         />
-        {formErrors.address ? <small>{formErrors.address}</small> : null}
+        {formErrors.streetAddress ? <small>{formErrors.streetAddress}</small> : null}
       </label>
-      <label>
+      <fieldset className="delivery-field" aria-invalid={Boolean(formErrors.deliveryCompany)}>
+        <legend>شركة التوصيل</legend>
+        <div className="delivery-options">
+          {DELIVERY_COMPANIES.map((company) => (
+            <label className={`delivery-option ${form.deliveryCompany === company.id ? "is-selected" : ""}`} key={company.id}>
+              <input
+                type="radio"
+                name="deliveryCompany"
+                value={company.id}
+                checked={form.deliveryCompany === company.id}
+                onChange={onChange}
+              />
+              <span>{company.name}</span>
+            </label>
+          ))}
+        </div>
+        {formErrors.deliveryCompany ? <small>{formErrors.deliveryCompany}</small> : null}
+      </fieldset>
+      <label className="field-label">
         <span>ملاحظات</span>
         <textarea name="notes" value={form.notes} onChange={onChange} rows={2} placeholder="اختياري" />
       </label>
@@ -649,14 +790,34 @@ export default function OrderingApp() {
   function handleFormChange(event) {
     const { name, value } = event.target;
     const nextValue = sanitizeFormField(name, value);
-    setForm((current) => ({ ...current, [name]: nextValue }));
-    setFormErrors((current) => ({ ...current, [name]: "" }));
+
+    setForm((current) => {
+      if (name === "neighborhoodSearch") {
+        const exactNeighborhood = DELIVERY_AREAS.find(
+          (area) => normalizeSearchValue(area.name) === normalizeSearchValue(nextValue)
+        );
+        return {
+          ...current,
+          neighborhoodSearch: nextValue,
+          neighborhood: exactNeighborhood ? exactNeighborhood.name : ""
+        };
+      }
+
+      return { ...current, [name]: nextValue };
+    });
+
+    setFormErrors((current) => {
+      const nextErrors = { ...current };
+      delete nextErrors[name === "neighborhoodSearch" ? "neighborhood" : name];
+      return nextErrors;
+    });
   }
 
   function validateForm() {
     const errors = {};
     const name = normalizeText(form.name);
-    const address = form.address.trim();
+    const neighborhoodSearch = normalizeText(form.neighborhoodSearch);
+    const streetAddress = normalizeText(form.streetAddress);
 
     if (!name) {
       errors.name = "الاسم مطلوب.";
@@ -670,8 +831,20 @@ export default function OrderingApp() {
       errors.phone = "أدخل رقم موبايل صحيح مثل 09XXXXXXXX.";
     }
 
-    if (!address) {
-      errors.address = "العنوان مطلوب.";
+    if (!neighborhoodSearch) {
+      errors.neighborhood = "المنطقة مطلوبة.";
+    } else if (!form.neighborhood || !isKnownNeighborhood(form.neighborhood)) {
+      errors.neighborhood = "اختر المنطقة من القائمة.";
+    }
+
+    if (!streetAddress) {
+      errors.streetAddress = "الشارع، أقرب علامة مطلوب.";
+    }
+
+    if (!form.deliveryCompany) {
+      errors.deliveryCompany = "اختر شركة توصيل واحدة.";
+    } else if (!isKnownDeliveryCompany(form.deliveryCompany)) {
+      errors.deliveryCompany = "اختر شركة توصيل من الخيارات المتاحة.";
     }
 
     return errors;
