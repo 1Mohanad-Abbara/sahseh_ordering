@@ -1274,6 +1274,10 @@ button:disabled {
   box-shadow: 0 10px 22px rgba(120, 15, 18, 0.18);
 }
 
+:root[data-theme="light"] .add-button {
+  background: var(--brand-red);
+}
+
 .primary-button {
   width: 100%;
   min-height: 2.65rem;
@@ -2011,7 +2015,7 @@ button:disabled {
   }
 
   :root[data-theme="light"] .add-button:not(:disabled):hover {
-    background: var(--brand-red-dark);
+    background: var(--brand-red);
     box-shadow: 0 12px 26px rgba(120, 15, 18, 0.16);
   }
 

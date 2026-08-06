@@ -367,7 +367,7 @@ function CartLine({ item, onIncrease, onDecrease, onRemove }) {
   );
 }
 
-function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disabled, deliveryFee, finalTotal }) {
+function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disabled, finalTotal }) {
   const [neighborhoodOpen, setNeighborhoodOpen] = useState(false);
   const [neighborhoodFilter, setNeighborhoodFilter] = useState("");
   const neighborhoodPickerRef = useRef(null);
@@ -376,10 +376,6 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
     if (!query) return DELIVERY_AREAS;
     return DELIVERY_AREAS.filter((area) => normalizeSearchValue(area.name).includes(query));
   }, [neighborhoodFilter]);
-  const orderTotal = Math.max(0, finalTotal - deliveryFee);
-  const finalTotalMessage = form.deliveryCompany
-    ? `مجموع الطلبات ${formatTotal(orderTotal)} + خدمة التوصيل ${formatTotal(deliveryFee)}`
-    : `مجموع الطلبات ${formatTotal(orderTotal)} + اختر خدمة التوصيل.`;
 
   function selectNeighborhood(name) {
     onChange({ target: { name: "neighborhood", value: name } });
@@ -550,7 +546,6 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
                 onChange={onChange}
               />
               <span>{company.name}</span>
-              <b>{formatTotal(company.deliveryFee)}</b>
             </label>
           ))}
         </div>
@@ -563,7 +558,6 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
       <div className="checkout-final" aria-live="polite">
         <span>السعر النهائي</span>
         <strong>{formatTotal(finalTotal)}</strong>
-        <small>{finalTotalMessage}</small>
       </div>
       <button className="primary-button checkout-submit" type="submit" disabled={disabled || isSubmitting}>
         {isSubmitting ? "جاري التحضير..." : "تأكيد الطلب"}

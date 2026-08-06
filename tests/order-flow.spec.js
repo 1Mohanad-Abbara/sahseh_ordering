@@ -60,6 +60,8 @@ test("desktop renders the ordering menu, aligns hash sections, toggles cart, kee
   await streetInput.fill("Homs 123, floor #5");
   await page.locator('input[name="deliveryCompany"][value="5g"]').check();
   await expect(page.locator(".checkout-final")).toContainText("200.00");
+  await expect(page.locator(".checkout-final small")).toHaveCount(0);
+  await expect(page.locator(".delivery-option b")).toHaveCount(0);
 
   await page.locator(".cart-trigger").click();
   await expect(page.locator(".cart-panel")).not.toHaveClass(/is-open/);

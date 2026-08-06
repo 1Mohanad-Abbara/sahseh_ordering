@@ -75,7 +75,7 @@ As of this review, shared menu data, brand images, background pattern, icons, an
 - Delivery service selection is required, labeled `خدمة التوصيل`, and must be exactly one of `5G`, `Tbsher - تبشر`, or `Fast Delivery`.
 - Current delivery fees are `5G` = `100.00`, `Tbsher - تبشر` = `200.00`, and `Fast Delivery` = `300.00`.
 - `src/OrderingApp.jsx` keeps a delivery area data structure with a per-company `deliveryPrices` slot for every neighborhood, so future pricing can differ by neighborhood and company.
-- The final price row appears after notes and combines product subtotal plus the selected delivery service fee.
+- The final price row appears after notes and shows only the combined product subtotal plus selected delivery service fee. Delivery fees are used in the calculation but are not shown beside company names.
 
 ## Theme And Visual Contract
 
@@ -86,7 +86,7 @@ The ordering app should match `../sahseh_menu` for shared visual surfaces:
 - Theme preference is stored in `localStorage["sahseh-menu-theme"]`, shared with the static menu.
 - Header, footer, logo treatment, menu cards, section controls, section icons, price slots, product modal shell, and back-to-top button should stay visually aligned with `../sahseh_menu`.
 - Desktop mouse hover effects should stay aligned with `../sahseh_menu` for section controls, product rows, price slots, theme/footer controls, and back-to-top behavior.
-- Ordering-only controls such as cart buttons, order buttons, quantity icon buttons, and the mobile floating cart should use the same desktop hover feel while preserving ordering layout. Product add buttons use the same dark red degree as section titles.
+- Ordering-only controls such as cart buttons, order buttons, quantity icon buttons, and the mobile floating cart should use the same desktop hover feel while preserving ordering layout. Product add buttons use the arrow-button red in light mode and the section-title dark red in dark mode.
 - The back-to-top button should keep the same colors on hover in both themes and only scale slightly on desktop mouse hover.
 - The header cart count badge must be a white circle with red text in light mode.
 - Buttons should show the normal pointer cursor on hover when enabled.
