@@ -304,7 +304,6 @@ function ProductModal({ product, quantity, fallbackIngredients, onClose, onAdd, 
         <div className="product-modal-top">
           <p className="product-modal-price">{productPriceText(product)}</p>
           <div className="product-modal-heading">
-            <p className="product-modal-category">{product.categoryName}</p>
             <h2 id="product-modal-title">{product.name}</h2>
           </div>
         </div>
@@ -638,6 +637,7 @@ export default function OrderingApp() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedOrder, setSubmittedOrder] = useState("");
   const [backToTopVisible, setBackToTopVisible] = useState(false);
+  const [footerVisible, setFooterVisible] = useState(false);
 
   useEffect(() => {
     const nextTheme = theme === "light" ? "light" : "dark";
@@ -688,36 +688,40 @@ export default function OrderingApp() {
 
   useEffect(() => {
     const footer = document.querySelector(".site-footer");
-    let footerVisible = false;
     let frame = 0;
 
-    function updateBackToTop() {
+    function isFooterInView() {
+      if (!footer) return false;
+      const rect = footer.getBoundingClientRect();
+      return rect.top < window.innerHeight && rect.bottom > 0;
+    }
+
+    function updateFloatingActions() {
       if (frame) return;
 
       frame = window.requestAnimationFrame(() => {
         frame = 0;
-        setBackToTopVisible(window.scrollY > 240 && !footerVisible);
+        const nextFooterVisible = isFooterInView();
+        setFooterVisible(nextFooterVisible);
+        setBackToTopVisible(window.scrollY > 240 && !nextFooterVisible);
       });
     }
 
     let footerObserver = null;
     if (footer && "IntersectionObserver" in window) {
-      footerObserver = new IntersectionObserver(([entry]) => {
-        footerVisible = entry.isIntersecting;
-        updateBackToTop();
-      });
+      footerObserver = new IntersectionObserver(updateFloatingActions);
       footerObserver.observe(footer);
     }
 
-    updateBackToTop();
-    window.addEventListener("scroll", updateBackToTop, { passive: true });
-    window.addEventListener("resize", updateBackToTop);
+    updateFloatingActions();
+    window.addEventListener("scroll", updateFloatingActions, { passive: true });
+    window.addEventListener("resize", updateFloatingActions);
 
     return () => {
       if (frame) window.cancelAnimationFrame(frame);
       if (footerObserver) footerObserver.disconnect();
-      window.removeEventListener("scroll", updateBackToTop);
-      window.removeEventListener("resize", updateBackToTop);
+      window.removeEventListener("scroll", updateFloatingActions);
+      window.removeEventListener("resize", updateFloatingActions);
     };
   }, []);
 
@@ -744,6 +748,7 @@ export default function OrderingApp() {
   );
 
   const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const floatingCartVisible = itemCount > 0 && !footerVisible;
 
   useEffect(() => {
     if (categories.length === 0) return undefined;
@@ -944,12 +949,18 @@ export default function OrderingApp() {
         </div>
       </main>
 
-      <button className={`floating-cart ${itemCount > 0 ? "is-visible" : ""}`} type="button" onClick={() => setCartOpen(true)}>
-        <span>السلة</span>
+      <button
+        className={`floating-cart ${floatingCartVisible ? "is-visible" : ""}`}
+        type="button"
+        onClick={() => setCartOpen(true)}
+        aria-label={`فتح السلة - ${itemCount} عناصر - ${formatTotal(cartTotal)}`}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 3h10a2 2 0 0 1 2 2v16l-3-1.5L13 21l-3-1.5L7 21l-2-1V5a2 2 0 0 1 2-2Z" />
+          <path d="M9 8h6M9 12h6M9 16h4" />
+        </svg>
         <strong>{itemCount}</strong>
-        <b>{formatTotal(cartTotal)}</b>
       </button>
-
       <button
         className={`back-to-top ${backToTopVisible ? "is-visible" : ""}`}
         type="button"

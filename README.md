@@ -60,9 +60,9 @@ As of this review, shared menu data, brand images, background pattern, icons, an
 3. The app renders 13 category controls, 13 menu sections, and 104 products from the current data.
 4. Category navigation uses `<button>` elements, not hash links. Clicking a category scrolls to the section without adding `#section-XX` to the URL.
 5. If the page is opened with an old `#section-XX` hash, the app scrolls to that section once and then clears the section hash from the URL.
-6. Product rows open the product modal when the product name/price area is clicked.
+6. Product rows open the product modal when the product name/price area is clicked. The modal title shows only the product name, not the section title.
 7. Add buttons and plus/minus steppers update the cart. Product quantities are clamped from 0 to 99.
-8. The cart can open from the header cart button or mobile floating cart. Desktop uses a fixed cart panel; mobile uses a bottom sheet with backdrop.
+8. The cart can open from the header cart button or compact mobile floating cart. Desktop uses a fixed cart panel; mobile uses a bottom sheet with backdrop. The mobile floating cart hides while the footer is visible so footer actions stay reachable.
 9. Checkout fields are name, phone, required searchable neighborhood, required `اسم الشارع .. أقرب علامة` text, required delivery service, and optional notes. Phone input is numeric and must match `09XXXXXXXX`. Name accepts letters/spaces only.
 10. Submit is mocked with an `SS-######` confirmation number. There is no real order API call yet.
 11. Back-to-top appears after scrolling past 240px and hides while the footer is visible.
@@ -159,7 +159,7 @@ Current Playwright expectations include:
 - Back-to-top hover keeps the same colors in light and dark mode and scales slightly on desktop hover.
 - Light-mode header cart count badge is white.
 - Desktop cart opens, closes, and preserves entered checkout data, including selected neighborhood, `اسم الشارع .. أقرب علامة`, and delivery service.
-- Mobile add-to-cart and checkout validation work, including required neighborhood selection, `اسم الشارع .. أقرب علامة`, and exactly one delivery service.
+- Mobile add-to-cart and checkout validation work, including the compact floating cart hiding at the footer, required neighborhood selection, `اسم الشارع .. أقرب علامة`, and exactly one delivery service.
 - Footer phone text link is limited to the phone text area.
 
 For shared data/assets, also run the source validation script from `../sahseh_source` after syncing source changes.

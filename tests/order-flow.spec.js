@@ -19,8 +19,15 @@ test("desktop renders the ordering menu, aligns hash sections, toggles cart, kee
 
   await expect(page.locator(".menu-section")).toHaveCount(13);
   await expect(page.locator(".product-list li")).toHaveCount(104);
+
   await expectSectionAligned(page, "section-06");
   await expect(page).not.toHaveURL(/#section-\d+$/);
+  const firstProductName = (await page.locator(".product-name").first().textContent()).trim();
+  const firstSectionTitle = (await page.locator(".menu-section h2").first().textContent()).trim();
+  await page.locator(".product-list li").first().locator(".product-open").click();
+  await expect(page.locator("#product-modal-title")).toHaveText(firstProductName);
+  await expect(page.locator(".product-modal-heading")).not.toContainText(firstSectionTitle);
+  await page.keyboard.press("Escape");
   await expect(page.locator(".section-nav button").first()).toHaveCSS("cursor", "pointer");
   await page.locator(".theme-toggle").click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
@@ -82,10 +89,16 @@ test("desktop renders the ordering menu, aligns hash sections, toggles cart, kee
 test("mobile handles validation, delivery address, add to cart, and checkout confirmation", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
+  await expect(page.locator(".product-list li")).toHaveCount(104);
 
   await page.locator(".product-list li").first().locator(".add-button").click();
   await expect(page.locator(".floating-cart")).toBeVisible();
   await expect(page.locator(".floating-cart")).toContainText("1");
+  await expect(page.locator(".floating-cart")).toHaveClass(/is-visible/);
+  await page.locator(".site-footer").scrollIntoViewIfNeeded();
+  await expect(page.locator(".floating-cart")).not.toHaveClass(/is-visible/);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await expect(page.locator(".floating-cart")).toHaveClass(/is-visible/);
 
   await page.locator(".floating-cart").click();
   await expect(page.locator(".cart-panel")).toContainText("شاي");
