@@ -1,66 +1,113 @@
 # Sahseh Ordering
 
-Customer ordering system workspace for Sahseh.
+Customer ordering frontend for Sahseh. This app is separate from the static QR menu in `../sahseh_menu`, but the shared visual shell must stay matched to it.
 
-This repo is separate from the static QR menu in `../sahseh_menu`. Shared source menu data and visual assets still live in `../sahseh_source`.
+Last reviewed against `index.html`, `src/OrderingApp.jsx`, `src/styles.css`, `public/data/menu.json`, and shared assets on 2026-08-06.
 
-## Current Status
+## Role
 
-The frontend foundation is built as a React app with Vite. A FastAPI backend scaffold is included for the future ordering API.
+`sahseh_ordering` is the customer ordering app. It keeps the same Sahseh menu look as `../sahseh_menu`, then adds ordering-only controls: add buttons, plus/minus quantity steppers, a cart/list panel, totals, customer information fields, and a mock confirmation flow.
 
-Implemented:
+Do not replace this React app with the static menu. Port shared visual changes from `../sahseh_menu` while preserving the ordering behavior in `src/OrderingApp.jsx`.
+
+## Current Stack
 
 - React + Vite frontend.
-- Arabic RTL interface.
-- Shared Sahseh logo, background pattern, category icons, and menu-matched dark/light visual themes.
-- Menu loaded from `public/data/menu.json`, synced from `../sahseh_source/data/menu.json`.
-- Category and product browsing.
-- Product detail modal.
-- Header, footer, logo treatment, colors, theme toggle, section buttons, and category icons matched to `../sahseh_menu`.
-- Add to cart.
-- Quantity controls.
-- Mobile floating cart.
-- Desktop pinned cart.
-- Cart total.
-- Checkout form for name, phone, address, and notes.
-- Mock order confirmation number.
-- Theme persistence through `localStorage["sahseh-menu-theme"]`, shared with the static QR menu.
-- FastAPI backend scaffold with CORS and health/order placeholder routes.
+- Arabic RTL UI.
+- Static menu data served from `public/data/menu.json`.
+- Static shared assets served from `public/assets/...`.
+- Playwright smoke test in `tests/order-flow.spec.js`.
+- FastAPI backend scaffold in `backend/`, not connected to the frontend order submission yet.
 
-Not implemented yet:
+## Source Of Truth
 
-- Real order submission.
-- Database.
-- Restaurant dashboard.
-- Admin login.
-- Order status updates.
-- Delivery notification or delivery integration.
+Canonical menu data and shared visual assets live in the sibling source repo:
 
-## Visual Parity Contract
+```text
+../sahseh_source/
+```
 
-The ordering frontend should look like `../sahseh_menu` for shared surfaces: colors, dark/light themes, logo, category icons, sticky header, footer, menu cards, price slots, modal shell, and back-to-top control. The intended differences are ordering-only controls: add buttons, plus/minus quantity controls, cart/list panel, totals, customer information fields, and order confirmation flow.
+Edit source files there first, then sync deploy copies into both app repos. Do not treat `public/data/menu.json` or `public/assets/...` as the canonical source unless the user explicitly requests an emergency app-only fix.
 
-Do not replace the React ordering app with the static menu. Port shared visuals from `../sahseh_menu` while preserving the cart and checkout behavior in `src/OrderingApp.jsx`.
-
-## Source Data And Assets
-
-Edit canonical menu data and shared assets in `../sahseh_source` first, then sync deploy copies into this app.
-
-Synced app paths:
+Shared deploy copies expected in this app:
 
 ```text
 public/data/menu.json
 public/assets/brand/brand-art.png
-public/assets/beauty/
+public/assets/brand/brand-art-removebg-preview.png
+public/assets/beauty/background-pattern.svg
+public/assets/beauty/icons/*.svg
 public/assets/img/products/
 ```
 
+As of this review, shared menu data, brand images, background pattern, icons, and product image placeholders are uniform across `../sahseh_source`, `../sahseh_menu`, and `public/` in this app.
+
 ## Project Structure
 
-- `src/` - React frontend source.
-- `public/` - synced deploy-copy menu data and shared assets.
-- `backend/` - FastAPI service scaffold.
-- `tests/order-flow.spec.js` - Playwright smoke test.
+- `index.html` - Vite HTML shell, Tajawal font preconnect/load, and early persisted-theme initialization.
+- `src/main.jsx` - React entrypoint.
+- `src/OrderingApp.jsx` - all frontend state and component logic for menu loading, section navigation, product modal, cart, checkout form, mock submit, theme, and back-to-top behavior.
+- `src/styles.css` - menu-matched base styling plus ordering-specific cart, button, form, and responsive overrides.
+- `public/data/menu.json` - synced deploy copy from `../sahseh_source/data/menu.json`.
+- `public/assets/` - synced deploy copy of shared logo/background/icons/product-image directory.
+- `backend/` - FastAPI scaffold for future real order API work.
+- `tests/order-flow.spec.js` - browser smoke coverage for render counts, section alignment, URL cleanliness, cart, checkout, cursor, light-mode badge, and footer phone-link boundary.
+
+## Runtime Behavior
+
+1. `OrderingApp` loads `public/data/menu.json` through `assetUrl("data/menu.json")`, respecting Vite `BASE_URL`.
+2. Menu categories and products are sorted by `order` and filtered when `visibleInOrdering === false`.
+3. The app renders 13 category controls, 13 menu sections, and 104 products from the current data.
+4. Category navigation uses `<button>` elements, not hash links. Clicking a category scrolls to the section without adding `#section-XX` to the URL.
+5. If the page is opened with an old `#section-XX` hash, the app scrolls to that section once and then clears the section hash from the URL.
+6. Product rows open the product modal when the product name/price area is clicked.
+7. Add buttons and plus/minus steppers update the cart. Product quantities are clamped from 0 to 99.
+8. The cart can open from the header cart button or mobile floating cart. Desktop uses a fixed cart panel; mobile uses a bottom sheet with backdrop.
+9. Checkout fields are name, phone, address, and optional notes. Phone input is numeric and must match `09XXXXXXXX`. Name accepts letters/spaces only.
+10. Submit is mocked with an `SS-######` confirmation number. There is no real order API call yet.
+11. Back-to-top appears after scrolling past 240px and hides while the footer is visible.
+
+## Theme And Visual Contract
+
+The ordering app should match `../sahseh_menu` for shared visual surfaces:
+
+- Dark mode is the default.
+- Light mode is controlled by `html[data-theme="light"]`.
+- Theme preference is stored in `localStorage["sahseh-menu-theme"]`, shared with the static menu.
+- Header, footer, logo treatment, menu cards, section controls, section icons, price slots, product modal shell, and back-to-top button should stay visually aligned with `../sahseh_menu`.
+- The back-to-top button should keep the same colors on hover in both themes and only scale slightly on desktop mouse hover.
+- The header cart count badge must be a white circle with red text in light mode.
+- Buttons should show the normal pointer cursor on hover when enabled.
+- Keep Arabic RTL layout and Tajawal font.
+
+Ordering-only UI may differ where necessary: add buttons, plus/minus controls, cart/list panel, totals, checkout fields, validation messages, and mock confirmation.
+
+## Data Contract
+
+`public/data/menu.json` mirrors source schema version 1:
+
+- `schemaVersion: 1`
+- `locale: "ar-SY"`
+- `direction: "rtl"`
+- `currencyCode: "SYP"`
+- `brand`
+- `defaults`
+- `categories`
+
+Each category should include `id`, `sectionId`, `name`, `order`, `icon`, `visibleInDineIn`, `visibleInOrdering`, and `products`.
+
+Each product should include `id`, `name`, `price`, `priceText`, `order`, `image`, `ingredients`, `available`, `visibleInDineIn`, and `visibleInOrdering`.
+
+Current product images and ingredients are not populated. The modal uses the fallback text `سيتم إضافة المكونات لاحقا.` and a placeholder image box.
+
+## Current Counts
+
+- 13 categories.
+- 104 products.
+- 104 prices.
+- 0 populated product images.
+- 0 populated product ingredient descriptions.
+- No empty price slots.
 
 ## Local Development
 
@@ -73,7 +120,7 @@ npm run dev
 
 Open the local Vite URL shown in the terminal, usually `http://127.0.0.1:5173`.
 
-Backend:
+Backend scaffold, for future backend work only:
 
 ```powershell
 python -m venv .venv
@@ -84,20 +131,37 @@ uvicorn backend.app.main:app --reload
 
 ## Validation
 
+Run these after frontend edits:
+
 ```powershell
 npm run build
 npm test
 ```
 
-The Playwright smoke test starts the Vite dev server automatically and checks that the app renders 13 categories, 103 products, hash-aligned sections, the desktop cart, the limited footer phone link area, and the mobile add-to-cart checkout flow.
+Current Playwright expectations include:
+
+- 13 category buttons.
+- 13 menu sections.
+- 104 product rows.
+- Category buttons scroll to sections without leaving `#section-XX` in the URL.
+- Enabled buttons have pointer cursor.
+- Back-to-top hover keeps the same colors in light and dark mode and scales slightly on desktop hover.
+- Light-mode header cart count badge is white.
+- Desktop cart opens, closes, and preserves entered checkout data.
+- Mobile add-to-cart and checkout validation work.
+- Footer phone text link is limited to the phone text area.
+
+For shared data/assets, also run the source validation script from `../sahseh_source` after syncing source changes.
 
 ## Backend Later
 
-After the frontend flow is stable, add backend/database work:
+Not implemented yet:
 
-- PostgreSQL.
-- Order creation endpoint.
+- Real order submission.
+- Database.
 - Restaurant dashboard.
 - Admin login.
 - Order status updates.
 - Delivery notification or delivery integration.
+
+Do not start these phases unless the user explicitly asks.

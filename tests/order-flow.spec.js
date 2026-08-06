@@ -18,7 +18,7 @@ test("desktop renders the ordering menu, aligns hash sections, toggles cart, kee
   await expect(page.locator(".section-nav button")).toHaveCount(13);
 
   await expect(page.locator(".menu-section")).toHaveCount(13);
-  await expect(page.locator(".product-list li")).toHaveCount(103);
+  await expect(page.locator(".product-list li")).toHaveCount(104);
   await expectSectionAligned(page, "section-06");
   await expect(page).not.toHaveURL(/#section-\d+$/);
   await expect(page.locator(".section-nav button").first()).toHaveCSS("cursor", "pointer");

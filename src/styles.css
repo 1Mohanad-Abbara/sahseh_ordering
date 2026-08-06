@@ -367,7 +367,6 @@ h1 {
   box-shadow: 0 14px 34px rgba(120, 15, 18, 0.28);
 }
 
-:root[data-theme="light"] .back-to-top:hover,
 :root[data-theme="light"] .back-to-top:focus-visible {
   background: var(--brand-red-dark);
 }
@@ -1036,7 +1035,6 @@ body.modal-open {
   transform: translateY(0);
 }
 
-.back-to-top:hover,
 .back-to-top:focus-visible {
   outline: none;
   background: #1d1815;
@@ -1655,6 +1653,137 @@ button:disabled {
   height: 2.6rem;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .theme-toggle,
+  .cart-trigger,
+  .section-nav button,
+  .product-list li,
+  .product-open,
+  .add-button,
+  .primary-button,
+  .icon-button,
+  .footer-action,
+  .floating-cart,
+  .back-to-top {
+    transition:
+      opacity 160ms ease,
+      background 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease,
+      box-shadow 160ms ease,
+      transform 160ms ease;
+  }
+
+  .theme-icon,
+  .cart-trigger svg,
+  .section-nav button img,
+  .footer-action svg,
+  .price-slot {
+    transition:
+      background 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease,
+      box-shadow 160ms ease,
+      transform 160ms ease;
+  }
+
+  .theme-toggle:hover,
+  .cart-trigger:hover,
+  .footer-action:hover {
+    border-color: var(--accent-line-strong);
+    background: rgba(237, 28, 35, 0.2);
+    box-shadow: 0 12px 26px rgba(237, 28, 35, 0.22);
+    transform: translateY(-2px);
+  }
+
+  .theme-toggle:hover .theme-icon,
+  .cart-trigger:hover svg,
+  .footer-action:hover svg {
+    transform: scale(1.08);
+  }
+
+  .section-nav button:hover {
+    border-color: var(--accent-line-strong);
+    background: linear-gradient(135deg, rgba(237, 28, 35, 0.22), rgba(29, 24, 21, 0.96));
+    color: var(--bar-text);
+    box-shadow: 0 14px 30px rgba(237, 28, 35, 0.2);
+    transform: translateY(-2px);
+  }
+
+  .section-nav button:hover img {
+    border-color: var(--accent-line-strong);
+    transform: scale(1.06);
+  }
+
+  .product-list li:not(.is-unavailable):hover {
+    background: linear-gradient(90deg, rgba(237, 28, 35, 0.08), rgba(237, 28, 35, 0.16));
+    box-shadow: inset -4px 0 0 var(--brand-red);
+  }
+
+  .product-list li:not(.is-unavailable):hover .price-slot {
+    border-style: solid;
+    background: rgba(237, 28, 35, 0.18);
+    box-shadow: 0 8px 18px rgba(237, 28, 35, 0.16);
+    transform: translateY(-1px);
+  }
+
+  .add-button:not(:disabled):hover,
+  .primary-button:not(:disabled):hover,
+  .floating-cart.is-visible:hover {
+    background: linear-gradient(90deg, #d91820, var(--brand-red));
+    box-shadow: 0 14px 30px rgba(237, 28, 35, 0.26);
+    transform: translateY(-2px);
+  }
+
+  .icon-button:not(:disabled):hover {
+    border-color: var(--accent-line-strong);
+    background: rgba(237, 28, 35, 0.2);
+    box-shadow: 0 10px 22px rgba(237, 28, 35, 0.2);
+    transform: translateY(-2px);
+  }
+
+  .back-to-top.is-visible:hover {
+    transform: translateY(0) scale(1.08);
+  }
+
+  :root[data-theme="light"] .theme-toggle:hover,
+  :root[data-theme="light"] .cart-trigger:hover,
+  :root[data-theme="light"] .footer-action:hover {
+    background: rgba(255, 255, 255, 0.24);
+    box-shadow: 0 12px 26px rgba(120, 15, 18, 0.24);
+  }
+
+  :root[data-theme="light"] .section-nav button:hover {
+    border-color: rgba(237, 31, 39, 0.5);
+    background: #fff2f2;
+    color: var(--brand-red-dark);
+    box-shadow: 0 14px 30px rgba(120, 15, 18, 0.16);
+  }
+
+  :root[data-theme="light"] .product-list li:not(.is-unavailable):hover {
+    background: linear-gradient(90deg, rgba(237, 31, 39, 0.05), rgba(237, 31, 39, 0.12));
+    box-shadow: inset -4px 0 0 var(--brand-red);
+  }
+
+  :root[data-theme="light"] .product-list li:not(.is-unavailable):hover .price-slot {
+    background: #fff1f1;
+    color: var(--brand-red-dark);
+    box-shadow: 0 8px 18px rgba(120, 15, 18, 0.12);
+  }
+
+  :root[data-theme="light"] .add-button:not(:disabled):hover,
+  :root[data-theme="light"] .primary-button:not(:disabled):hover,
+  :root[data-theme="light"] .floating-cart.is-visible:hover {
+    background: linear-gradient(90deg, #d91820, var(--brand-red));
+    box-shadow: 0 14px 30px rgba(120, 15, 18, 0.2);
+  }
+
+  :root[data-theme="light"] .icon-button:not(:disabled):hover {
+    background: #fff2f2;
+    color: var(--brand-red-dark);
+    box-shadow: 0 10px 22px rgba(120, 15, 18, 0.12);
+  }
+}
 .menu-loading,
 .menu-error {
   margin: 1rem 0;
