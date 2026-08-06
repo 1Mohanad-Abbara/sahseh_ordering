@@ -467,19 +467,19 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
         {formErrors.neighborhood ? <small>{formErrors.neighborhood}</small> : null}
       </label>
       <label className="field-label">
-        <span>الشارع، أقرب علامة</span>
+        <span>اسم الشارع .. أقرب علامة</span>
         <textarea
           name="streetAddress"
           value={form.streetAddress}
           onChange={onChange}
           rows={3}
           aria-invalid={Boolean(formErrors.streetAddress)}
-          placeholder="اكتب الشارع وأقرب علامة"
+          placeholder="اكتب اسم الشارع وأقرب علامة"
         />
         {formErrors.streetAddress ? <small>{formErrors.streetAddress}</small> : null}
       </label>
       <fieldset className="delivery-field" aria-invalid={Boolean(formErrors.deliveryCompany)}>
-        <legend>شركة التوصيل</legend>
+        <legend>خدمة التوصيل</legend>
         <div className="delivery-options">
           {DELIVERY_COMPANIES.map((company) => (
             <label className={`delivery-option ${form.deliveryCompany === company.id ? "is-selected" : ""}`} key={company.id}>
@@ -838,13 +838,13 @@ export default function OrderingApp() {
     }
 
     if (!streetAddress) {
-      errors.streetAddress = "الشارع، أقرب علامة مطلوب.";
+      errors.streetAddress = "اسم الشارع .. أقرب علامة مطلوب.";
     }
 
     if (!form.deliveryCompany) {
-      errors.deliveryCompany = "اختر شركة توصيل واحدة.";
+      errors.deliveryCompany = "اختر خدمة توصيل واحدة.";
     } else if (!isKnownDeliveryCompany(form.deliveryCompany)) {
-      errors.deliveryCompany = "اختر شركة توصيل من الخيارات المتاحة.";
+      errors.deliveryCompany = "اختر خدمة توصيل من الخيارات المتاحة.";
     }
 
     return errors;

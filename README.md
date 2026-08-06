@@ -63,7 +63,7 @@ As of this review, shared menu data, brand images, background pattern, icons, an
 6. Product rows open the product modal when the product name/price area is clicked.
 7. Add buttons and plus/minus steppers update the cart. Product quantities are clamped from 0 to 99.
 8. The cart can open from the header cart button or mobile floating cart. Desktop uses a fixed cart panel; mobile uses a bottom sheet with backdrop.
-9. Checkout fields are name, phone, required searchable neighborhood, required street/nearest-landmark text, required delivery company, and optional notes. Phone input is numeric and must match `09XXXXXXXX`. Name accepts letters/spaces only.
+9. Checkout fields are name, phone, required searchable neighborhood, required `اسم الشارع .. أقرب علامة` text, required delivery service, and optional notes. Phone input is numeric and must match `09XXXXXXXX`. Name accepts letters/spaces only.
 10. Submit is mocked with an `SS-######` confirmation number. There is no real order API call yet.
 11. Back-to-top appears after scrolling past 240px and hides while the footer is visible.
 
@@ -71,8 +71,8 @@ As of this review, shared menu data, brand images, background pattern, icons, an
 
 - Neighborhood selection is required, sorted with Arabic locale ordering, and searchable by any substring. For example, typing `عر` should show `وعر`.
 - Current neighborhoods are: ادخار، انشائات، باب سباع، بابا عمرو، جميدية، جورة الشياح، حضارة، حمرا، خالدية، دبلان، شبابية، غوطة، قصور، كرم الشامي، كرم اللوز، ميدان، وادي الذهب، وعر.
-- Street/nearest-landmark text is required and is labeled `الشارع، أقرب علامة`.
-- Delivery company selection is required and must be exactly one of `5G`, `Tbsher - تبشر`, or `Fast Delivery`.
+- Street/nearest-landmark text is required and is labeled `اسم الشارع .. أقرب علامة`.
+- Delivery service selection is required, labeled `خدمة التوصيل`, and must be exactly one of `5G`, `Tbsher - تبشر`, or `Fast Delivery`.
 - `src/OrderingApp.jsx` keeps a delivery area data structure with a per-company `deliveryPrices` slot for every neighborhood. Prices are currently `null` until the company price table is provided.
 
 ## Theme And Visual Contract
@@ -158,8 +158,8 @@ Current Playwright expectations include:
 - Desktop hover effects work for category buttons, product rows, price slots, ordering buttons, icon buttons, and footer/header controls in dark and light mode.
 - Back-to-top hover keeps the same colors in light and dark mode and scales slightly on desktop hover.
 - Light-mode header cart count badge is white.
-- Desktop cart opens, closes, and preserves entered checkout data, including selected neighborhood, street/nearest landmark, and delivery company.
-- Mobile add-to-cart and checkout validation work, including required neighborhood selection, street/nearest landmark, and exactly one delivery company.
+- Desktop cart opens, closes, and preserves entered checkout data, including selected neighborhood, `اسم الشارع .. أقرب علامة`, and delivery service.
+- Mobile add-to-cart and checkout validation work, including required neighborhood selection, `اسم الشارع .. أقرب علامة`, and exactly one delivery service.
 - Footer phone text link is limited to the phone text area.
 
 For shared data/assets, also run the source validation script from `../sahseh_source` after syncing source changes.

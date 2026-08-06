@@ -51,6 +51,8 @@ test("desktop renders the ordering menu, aligns hash sections, toggles cart, kee
   await expect(page.locator(".cart-panel")).not.toHaveClass(/is-open/);
   await page.locator(".cart-trigger").click();
   await expect(page.locator(".cart-panel")).toHaveClass(/is-open/);
+  await expect(page.getByText("اسم الشارع .. أقرب علامة", { exact: true })).toBeVisible();
+  await expect(page.getByText("خدمة التوصيل", { exact: true })).toBeVisible();
   await expect(page.locator(".cart-panel")).toContainText("شاي");
   await expect(page.locator('input[name="name"]')).toHaveValue("Test");
   await expect(page.locator('input[name="phone"]')).toHaveValue("0947040585");
@@ -107,7 +109,7 @@ test("mobile handles validation, delivery address, add to cart, and checkout con
   await page.locator(".checkout-submit").click();
   await expect(page.locator(".checkout-form")).toContainText("09XXXXXXXX");
   await expect(page.locator(".checkout-form")).toContainText("اختر المنطقة من القائمة");
-  await expect(page.locator(".checkout-form")).toContainText("اختر شركة توصيل واحدة");
+  await expect(page.locator(".checkout-form")).toContainText("اختر خدمة توصيل واحدة");
 
   await phoneInput.fill("09abc47040585");
   await expect(phoneInput).toHaveValue("0947040585");
