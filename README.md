@@ -51,7 +51,7 @@ As of this review, shared menu data, brand images, background pattern, icons, an
 - `public/data/menu.json` - synced deploy copy from `../sahseh_source/data/menu.json`.
 - `public/assets/` - synced deploy copy of shared logo/background/icons/product-image directory.
 - `backend/` - FastAPI scaffold for future real order API work.
-- `tests/order-flow.spec.js` - browser smoke coverage for render counts, section alignment, URL cleanliness, cart, checkout delivery fields, cursor, light-mode badge, and footer phone-link boundary.
+- `tests/order-flow.spec.js` - browser smoke coverage for render counts, section alignment, URL cleanliness, cart, checkout delivery fields, delivery-fee totals, cursor, light-mode badge, and footer phone-link boundary.
 
 ## Runtime Behavior
 
@@ -62,18 +62,20 @@ As of this review, shared menu data, brand images, background pattern, icons, an
 5. If the page is opened with an old `#section-XX` hash, the app scrolls to that section once and then clears the section hash from the URL.
 6. Product rows open the product modal when the product name/price area is clicked. The modal title shows only the product name, not the section title.
 7. Add buttons and plus/minus steppers update the cart. Product quantities are clamped from 0 to 99.
-8. The cart can open from the header cart button or compact mobile floating cart. Desktop uses a fixed cart panel; mobile uses a bottom sheet with backdrop. The mobile floating cart hides while the footer is visible so footer actions stay reachable.
-9. Checkout fields are name, phone, required searchable neighborhood, required `اسم الشارع .. أقرب علامة` text, required delivery service, and optional notes. Phone input is numeric and must match `09XXXXXXXX`. Name accepts letters/spaces only.
+8. The cart can open from the header cart button or compact mobile floating cart. Desktop uses a fixed cart panel; mobile uses a bottom sheet with backdrop and locks background scrolling while open. The mobile floating cart hides while the footer is visible so footer actions stay reachable.
+9. Checkout fields are name, phone, required neighborhood select, required `اسم الشارع .. أقرب علامة` text, required delivery service, optional notes, and a final-price row after notes. Phone input is numeric and must match `09XXXXXXXX`. Name accepts letters/spaces only.
 10. Submit is mocked with an `SS-######` confirmation number. There is no real order API call yet.
 11. Back-to-top appears after scrolling past 240px and hides while the footer is visible.
 
 ## Checkout Delivery Fields
 
-- Neighborhood selection is required, sorted with Arabic locale ordering, and searchable by any substring. For example, typing `عر` should show `وعر`.
+- Neighborhood selection is required and sorted with Arabic locale ordering. It is shown as a select-style list with no visible search field; typing while the list is focused filters by any substring. For example, typing `عر` should show `وعر`.
 - Current neighborhoods are: ادخار، انشائات، باب سباع، بابا عمرو، جميدية، جورة الشياح، حضارة، حمرا، خالدية، دبلان، شبابية، غوطة، قصور، كرم الشامي، كرم اللوز، ميدان، وادي الذهب، وعر.
 - Street/nearest-landmark text is required and is labeled `اسم الشارع .. أقرب علامة`.
 - Delivery service selection is required, labeled `خدمة التوصيل`, and must be exactly one of `5G`, `Tbsher - تبشر`, or `Fast Delivery`.
-- `src/OrderingApp.jsx` keeps a delivery area data structure with a per-company `deliveryPrices` slot for every neighborhood. Prices are currently `null` until the company price table is provided.
+- Current delivery fees are `5G` = `100.00`, `Tbsher - تبشر` = `200.00`, and `Fast Delivery` = `300.00`.
+- `src/OrderingApp.jsx` keeps a delivery area data structure with a per-company `deliveryPrices` slot for every neighborhood, so future pricing can differ by neighborhood and company.
+- The final price row appears after notes and combines product subtotal plus the selected delivery service fee.
 
 ## Theme And Visual Contract
 
@@ -84,7 +86,7 @@ The ordering app should match `../sahseh_menu` for shared visual surfaces:
 - Theme preference is stored in `localStorage["sahseh-menu-theme"]`, shared with the static menu.
 - Header, footer, logo treatment, menu cards, section controls, section icons, price slots, product modal shell, and back-to-top button should stay visually aligned with `../sahseh_menu`.
 - Desktop mouse hover effects should stay aligned with `../sahseh_menu` for section controls, product rows, price slots, theme/footer controls, and back-to-top behavior.
-- Ordering-only controls such as cart buttons, add/order buttons, quantity icon buttons, and the mobile floating cart should use the same desktop hover feel while preserving ordering layout.
+- Ordering-only controls such as cart buttons, order buttons, quantity icon buttons, and the mobile floating cart should use the same desktop hover feel while preserving ordering layout. Product add buttons use the same dark red degree as section titles.
 - The back-to-top button should keep the same colors on hover in both themes and only scale slightly on desktop mouse hover.
 - The header cart count badge must be a white circle with red text in light mode.
 - Buttons should show the normal pointer cursor on hover when enabled.
@@ -158,8 +160,8 @@ Current Playwright expectations include:
 - Desktop hover effects work for category buttons, product rows, price slots, ordering buttons, icon buttons, and footer/header controls in dark and light mode.
 - Back-to-top hover keeps the same colors in light and dark mode and scales slightly on desktop hover.
 - Light-mode header cart count badge is white.
-- Desktop cart opens, closes, and preserves entered checkout data, including selected neighborhood, `اسم الشارع .. أقرب علامة`, and delivery service.
-- Mobile add-to-cart and checkout validation work, including the compact floating cart hiding at the footer, required neighborhood selection, `اسم الشارع .. أقرب علامة`, and exactly one delivery service.
+- Desktop cart opens, closes, and preserves entered checkout data, including selected neighborhood, `اسم الشارع .. أقرب علامة`, delivery service, and delivery-fee final total.
+- Mobile add-to-cart and checkout validation work, including the compact floating cart hiding at the footer, locked background scrolling while the cart sheet is open, select-only substring-filtered neighborhood selection, `اسم الشارع .. أقرب علامة`, exactly one delivery service, and final total with delivery fee.
 - Footer phone text link is limited to the phone text area.
 
 For shared data/assets, also run the source validation script from `../sahseh_source` after syncing source changes.

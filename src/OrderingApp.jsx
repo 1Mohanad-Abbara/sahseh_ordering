@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const BASE_URL = import.meta.env.BASE_URL || "/";
 const MENU_SOURCE = assetUrl("data/menu.json");
@@ -7,15 +7,14 @@ const EMPTY_FORM = {
   name: "",
   phone: "",
   neighborhood: "",
-  neighborhoodSearch: "",
   streetAddress: "",
   deliveryCompany: "",
   notes: ""
 };
 const DELIVERY_COMPANIES = [
-  { id: "5g", name: "5G" },
-  { id: "tbsher", name: "Tbsher - تبشر" },
-  { id: "fast-delivery", name: "Fast Delivery" }
+  { id: "5g", name: "5G", deliveryFee: 100 },
+  { id: "tbsher", name: "Tbsher - تبشر", deliveryFee: 200 },
+  { id: "fast-delivery", name: "Fast Delivery", deliveryFee: 300 }
 ];
 const NEIGHBORHOODS = [
   "حمرا",
@@ -40,7 +39,7 @@ const NEIGHBORHOODS = [
 const DELIVERY_AREAS = NEIGHBORHOODS.map((name) => ({
   name,
   deliveryPrices: DELIVERY_COMPANIES.reduce((prices, company) => {
-    prices[company.id] = null;
+    prices[company.id] = company.deliveryFee;
     return prices;
   }, {})
 }));
@@ -92,6 +91,10 @@ function isKnownNeighborhood(value) {
 
 function isKnownDeliveryCompany(value) {
   return DELIVERY_COMPANIES.some((company) => company.id === value);
+}
+
+function deliveryFeeForCompany(value) {
+  return DELIVERY_COMPANIES.find((company) => company.id === value)?.deliveryFee || 0;
 }
 
 function orderedItems(items = []) {
@@ -364,35 +367,94 @@ function CartLine({ item, onIncrease, onDecrease, onRemove }) {
   );
 }
 
-function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disabled }) {
+function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disabled, deliveryFee, finalTotal }) {
   const [neighborhoodOpen, setNeighborhoodOpen] = useState(false);
+  const [neighborhoodFilter, setNeighborhoodFilter] = useState("");
+  const neighborhoodPickerRef = useRef(null);
   const filteredNeighborhoods = useMemo(() => {
-    const query = normalizeSearchValue(form.neighborhoodSearch);
+    const query = normalizeSearchValue(neighborhoodFilter);
     if (!query) return DELIVERY_AREAS;
     return DELIVERY_AREAS.filter((area) => normalizeSearchValue(area.name).includes(query));
-  }, [form.neighborhoodSearch]);
+  }, [neighborhoodFilter]);
+  const orderTotal = Math.max(0, finalTotal - deliveryFee);
+  const finalTotalMessage = form.deliveryCompany
+    ? `مجموع الطلبات ${formatTotal(orderTotal)} + خدمة التوصيل ${formatTotal(deliveryFee)}`
+    : `مجموع الطلبات ${formatTotal(orderTotal)} + اختر خدمة التوصيل.`;
 
   function selectNeighborhood(name) {
-    onChange({ target: { name: "neighborhoodSearch", value: name } });
+    onChange({ target: { name: "neighborhood", value: name } });
+    setNeighborhoodFilter("");
     setNeighborhoodOpen(false);
   }
 
-  function handleNeighborhoodBlur(event) {
-    if (!event.currentTarget.contains(event.relatedTarget)) {
+  function handleNeighborhoodToggle() {
+    setNeighborhoodOpen((open) => {
+      const nextOpen = !open;
+      if (nextOpen) setNeighborhoodFilter("");
+      return nextOpen;
+    });
+  }
+
+  function handleNeighborhoodTypeKey(event) {
+    if (event.altKey || event.ctrlKey || event.metaKey) return;
+
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      setNeighborhoodOpen(true);
+      return;
+    }
+
+    if (event.key === "Enter" && neighborhoodOpen && filteredNeighborhoods.length > 0) {
+      event.preventDefault();
+      selectNeighborhood(filteredNeighborhoods[0].name);
+      return;
+    }
+
+    if (event.key === "Escape") {
+      setNeighborhoodFilter("");
       setNeighborhoodOpen(false);
+      return;
+    }
+
+    if (event.key === "Backspace") {
+      event.preventDefault();
+      setNeighborhoodFilter((current) => current.slice(0, -1));
+      setNeighborhoodOpen(true);
+      return;
+    }
+
+    if (event.key.length === 1) {
+      event.preventDefault();
+      setNeighborhoodFilter((current) => current + event.key);
+      setNeighborhoodOpen(true);
     }
   }
 
   function handleNeighborhoodKeyDown(event) {
-    if (event.key === "Enter" && filteredNeighborhoods.length > 0) {
-      event.preventDefault();
-      selectNeighborhood(filteredNeighborhoods[0].name);
+    handleNeighborhoodTypeKey(event);
+  }
+
+  useEffect(() => {
+    if (!neighborhoodOpen) return undefined;
+
+    function handleDocumentKeyDown(event) {
+      if (event.target instanceof Element && event.target.closest(".neighborhood-picker")) return;
+      handleNeighborhoodTypeKey(event);
     }
 
-    if (event.key === "Escape") {
+    function handleDocumentPointerDown(event) {
+      if (neighborhoodPickerRef.current?.contains(event.target)) return;
+      setNeighborhoodFilter("");
       setNeighborhoodOpen(false);
     }
-  }
+
+    document.addEventListener("keydown", handleDocumentKeyDown);
+    document.addEventListener("pointerdown", handleDocumentPointerDown);
+    return () => {
+      document.removeEventListener("keydown", handleDocumentKeyDown);
+      document.removeEventListener("pointerdown", handleDocumentPointerDown);
+    };
+  }, [neighborhoodOpen, filteredNeighborhoods]);
 
   return (
     <form className="checkout-form" onSubmit={onSubmit} noValidate>
@@ -424,23 +486,21 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
         />
         {formErrors.phone ? <small>{formErrors.phone}</small> : null}
       </label>
-      <label className="field-label neighborhood-field">
+      <div className="field-label neighborhood-field">
         <span>المنطقة</span>
-        <div className="neighborhood-picker" onFocus={() => setNeighborhoodOpen(true)} onBlur={handleNeighborhoodBlur}>
-          <input
-            name="neighborhoodSearch"
-            type="text"
-            value={form.neighborhoodSearch}
-            onChange={onChange}
-            onKeyDown={handleNeighborhoodKeyDown}
-            autoComplete="off"
-            role="combobox"
-            aria-autocomplete="list"
+        <div className="neighborhood-picker" ref={neighborhoodPickerRef} onKeyDown={handleNeighborhoodKeyDown}>
+          <button
+            className="neighborhood-select"
+            type="button"
+            onClick={handleNeighborhoodToggle}
+            aria-haspopup="listbox"
             aria-expanded={neighborhoodOpen}
             aria-controls="neighborhood-options"
             aria-invalid={Boolean(formErrors.neighborhood)}
-            placeholder="ابحث عن المنطقة"
-          />
+          >
+            <span>{form.neighborhood || "اختر المنطقة"}</span>
+            <b aria-hidden="true">v</b>
+          </button>
           {neighborhoodOpen ? (
             <div className="neighborhood-list" id="neighborhood-options" role="listbox">
               {filteredNeighborhoods.length > 0 ? (
@@ -464,7 +524,7 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
           ) : null}
         </div>
         {formErrors.neighborhood ? <small>{formErrors.neighborhood}</small> : null}
-      </label>
+      </div>
       <label className="field-label">
         <span>اسم الشارع .. أقرب علامة</span>
         <textarea
@@ -473,7 +533,7 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
           onChange={onChange}
           rows={3}
           aria-invalid={Boolean(formErrors.streetAddress)}
-          placeholder="اكتب اسم الشارع وأقرب علامة"
+          placeholder="اسم الشارع ، أقرب علامة"
         />
         {formErrors.streetAddress ? <small>{formErrors.streetAddress}</small> : null}
       </label>
@@ -490,6 +550,7 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
                 onChange={onChange}
               />
               <span>{company.name}</span>
+              <b>{formatTotal(company.deliveryFee)}</b>
             </label>
           ))}
         </div>
@@ -499,8 +560,13 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
         <span>ملاحظات</span>
         <textarea name="notes" value={form.notes} onChange={onChange} rows={2} placeholder="اختياري" />
       </label>
+      <div className="checkout-final" aria-live="polite">
+        <span>السعر النهائي</span>
+        <strong>{formatTotal(finalTotal)}</strong>
+        <small>{finalTotalMessage}</small>
+      </div>
       <button className="primary-button checkout-submit" type="submit" disabled={disabled || isSubmitting}>
-        {isSubmitting ? "جاري التحضير..." : "تأكيد الطلب التجريبي"}
+        {isSubmitting ? "جاري التحضير..." : "تأكيد الطلب"}
       </button>
     </form>
   );
@@ -510,6 +576,8 @@ function CartPanel({
   open,
   items,
   total,
+  deliveryFee,
+  finalTotal,
   form,
   formErrors,
   isSubmitting,
@@ -567,7 +635,7 @@ function CartPanel({
           )}
 
           <div className="cart-total">
-            <span>المجموع</span>
+            <span>مجموع المنتجات</span>
             <strong>{formatTotal(total)}</strong>
           </div>
 
@@ -578,6 +646,8 @@ function CartPanel({
             onChange={onFormChange}
             onSubmit={onSubmit}
             disabled={empty}
+            deliveryFee={deliveryFee}
+            finalTotal={finalTotal}
           />
         </>
       )}
@@ -687,6 +757,23 @@ export default function OrderingApp() {
   }, [activeProductId]);
 
   useEffect(() => {
+    function syncCartScrollLock() {
+      const shouldLock = cartOpen && window.matchMedia("(max-width: 979px)").matches;
+      document.documentElement.classList.toggle("cart-open", shouldLock);
+      document.body.classList.toggle("cart-open", shouldLock);
+    }
+
+    syncCartScrollLock();
+    window.addEventListener("resize", syncCartScrollLock);
+
+    return () => {
+      document.documentElement.classList.remove("cart-open");
+      document.body.classList.remove("cart-open");
+      window.removeEventListener("resize", syncCartScrollLock);
+    };
+  }, [cartOpen]);
+
+  useEffect(() => {
     const footer = document.querySelector(".site-footer");
     let frame = 0;
 
@@ -746,6 +833,8 @@ export default function OrderingApp() {
     () => cartItems.reduce((total, item) => total + productPrice(item.product) * item.quantity, 0),
     [cartItems]
   );
+  const deliveryFee = deliveryFeeForCompany(form.deliveryCompany);
+  const finalTotal = cartTotal + deliveryFee;
 
   const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const floatingCartVisible = itemCount > 0 && !footerVisible;
@@ -796,24 +885,11 @@ export default function OrderingApp() {
     const { name, value } = event.target;
     const nextValue = sanitizeFormField(name, value);
 
-    setForm((current) => {
-      if (name === "neighborhoodSearch") {
-        const exactNeighborhood = DELIVERY_AREAS.find(
-          (area) => normalizeSearchValue(area.name) === normalizeSearchValue(nextValue)
-        );
-        return {
-          ...current,
-          neighborhoodSearch: nextValue,
-          neighborhood: exactNeighborhood ? exactNeighborhood.name : ""
-        };
-      }
-
-      return { ...current, [name]: nextValue };
-    });
+    setForm((current) => ({ ...current, [name]: nextValue }));
 
     setFormErrors((current) => {
       const nextErrors = { ...current };
-      delete nextErrors[name === "neighborhoodSearch" ? "neighborhood" : name];
+      delete nextErrors[name];
       return nextErrors;
     });
   }
@@ -821,7 +897,6 @@ export default function OrderingApp() {
   function validateForm() {
     const errors = {};
     const name = normalizeText(form.name);
-    const neighborhoodSearch = normalizeText(form.neighborhoodSearch);
     const streetAddress = normalizeText(form.streetAddress);
 
     if (!name) {
@@ -836,9 +911,9 @@ export default function OrderingApp() {
       errors.phone = "أدخل رقم موبايل صحيح مثل 09XXXXXXXX.";
     }
 
-    if (!neighborhoodSearch) {
+    if (!form.neighborhood) {
       errors.neighborhood = "المنطقة مطلوبة.";
-    } else if (!form.neighborhood || !isKnownNeighborhood(form.neighborhood)) {
+    } else if (!isKnownNeighborhood(form.neighborhood)) {
       errors.neighborhood = "اختر المنطقة من القائمة.";
     }
 
@@ -934,6 +1009,8 @@ export default function OrderingApp() {
             open={cartOpen}
             items={cartItems}
             total={cartTotal}
+            deliveryFee={deliveryFee}
+            finalTotal={finalTotal}
             form={form}
             formErrors={formErrors}
             isSubmitting={isSubmitting}
@@ -953,7 +1030,7 @@ export default function OrderingApp() {
         className={`floating-cart ${floatingCartVisible ? "is-visible" : ""}`}
         type="button"
         onClick={() => setCartOpen(true)}
-        aria-label={`فتح السلة - ${itemCount} عناصر - ${formatTotal(cartTotal)}`}
+        aria-label={`فتح السلة - ${itemCount} عناصر - ${formatTotal(finalTotal)}`}
       >
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M7 3h10a2 2 0 0 1 2 2v16l-3-1.5L13 21l-3-1.5L7 21l-2-1V5a2 2 0 0 1 2-2Z" />
