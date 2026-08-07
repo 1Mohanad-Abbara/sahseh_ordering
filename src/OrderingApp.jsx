@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 const BASE_URL = import.meta.env.BASE_URL || "/";
 const MENU_SOURCE = assetUrl("data/menu.json");
 const INGREDIENT_FALLBACK = "سيتم إضافة المكونات لاحقا.";
+const WHATSAPP_ORDER_NUMBER = "963944848659";
 const EMPTY_FORM = {
   name: "",
   phone: "",
@@ -119,6 +120,41 @@ function productPrice(product) {
 
 function formatTotal(value) {
   return Number(value || 0).toFixed(2);
+}
+
+function deliveryCompanyName(value) {
+  return DELIVERY_COMPANIES.find((company) => company.id === value)?.name || value;
+}
+
+function buildWhatsAppOrderMessage(form, cartItems, finalTotal) {
+  const items = cartItems.map(({ product, quantity }) =>
+    `- ${product.name} x${quantity} = ${formatTotal(productPrice(product) * quantity)}`
+  ).join("\n");
+
+  return [
+    "طلب جديد من صَح صِح",
+    "",
+    `الاسم: ${form.name}`,
+    `رقم الهاتف: ${form.phone}`,
+    `المنطقة: ${form.neighborhood}`,
+    `اسم الشارع .. أقرب علامة: ${form.streetAddress}`,
+    `خدمة التوصيل: ${deliveryCompanyName(form.deliveryCompany)}`,
+    "",
+    "الطلبات:",
+    items,
+    "",
+    `السعر النهائي: ${formatTotal(finalTotal)}`,
+    form.notes ? `ملاحظات: ${form.notes}` : ""
+  ].filter(Boolean).join("\n");
+}
+
+function openWhatsAppOrder(message) {
+  const url = `https://wa.me/${WHATSAPP_ORDER_NUMBER}?text=${encodeURIComponent(message)}`;
+  const link = document.createElement("a");
+  link.href = url;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.click();
 }
 
 function normalizeMenu(menuData) {
@@ -598,9 +634,9 @@ function CartPanel({
 
       {submittedOrder ? (
         <section className="order-confirmation">
-          <p>تم تسجيل الطلب تجريبياً</p>
+          <p>تم تجهيز الطلب</p>
           <strong>{submittedOrder}</strong>
-          <span>هذا تأكيد تجريبي فقط.</span>
+          <span>تم فتح محادثة واتساب بالطلب. اضغط إرسال لإتمام الطلب.</span>
           <button className="primary-button" type="button" onClick={onNewOrder}>
             طلب جديد
           </button>
@@ -930,12 +966,13 @@ export default function OrderingApp() {
     setFormErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
+    const confirmationNumber = `SS-${Date.now().toString().slice(-6)}`;
+    const message = buildWhatsAppOrderMessage(form, cartItems, finalTotal);
     setIsSubmitting(true);
-    window.setTimeout(() => {
-      setSubmittedOrder(`SS-${Date.now().toString().slice(-6)}`);
-      setIsSubmitting(false);
-      setCart({});
-    }, 600);
+    openWhatsAppOrder(message);
+    setSubmittedOrder(confirmationNumber);
+    setIsSubmitting(false);
+    setCart({});
   }
 
   function handleNewOrder() {

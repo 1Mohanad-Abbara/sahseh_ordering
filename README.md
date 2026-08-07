@@ -6,7 +6,7 @@ Last reviewed against `index.html`, `src/OrderingApp.jsx`, `src/styles.css`, `pu
 
 ## Role
 
-`sahseh_ordering` is the customer ordering app. It keeps the same Sahseh menu look as `../sahseh_menu`, then adds ordering-only controls: add buttons, plus/minus quantity steppers, a cart/list panel, totals, customer information fields, and a mock confirmation flow.
+`sahseh_ordering` is the customer ordering app. It keeps the same Sahseh menu look as `../sahseh_menu`, then adds ordering-only controls: add buttons, plus/minus quantity steppers, a cart/list panel, totals, customer information fields, and WhatsApp click-to-chat checkout.
 
 Do not replace this React app with the static menu. Port shared visual changes from `../sahseh_menu` while preserving the ordering behavior in `src/OrderingApp.jsx`.
 
@@ -17,7 +17,6 @@ Do not replace this React app with the static menu. Port shared visual changes f
 - Static menu data served from `public/data/menu.json`.
 - Static shared assets served from `public/assets/...`.
 - Playwright smoke test in `tests/order-flow.spec.js`.
-- FastAPI backend scaffold in `backend/`, not connected to the frontend order submission yet.
 
 ## Source Of Truth
 
@@ -46,11 +45,10 @@ As of this review, shared menu data, brand images, background pattern, icons, an
 
 - `index.html` - Vite HTML shell, Tajawal font preconnect/load, and early persisted-theme initialization.
 - `src/main.jsx` - React entrypoint.
-- `src/OrderingApp.jsx` - all frontend state and component logic for menu loading, section navigation, product modal, cart, checkout form, mock submit, theme, and back-to-top behavior.
+- `src/OrderingApp.jsx` - all frontend state and component logic for menu loading, section navigation, product modal, cart, checkout form, WhatsApp checkout, theme, and back-to-top behavior.
 - `src/styles.css` - menu-matched base styling plus ordering-specific cart, button, form, and responsive overrides.
 - `public/data/menu.json` - synced deploy copy from `../sahseh_source/data/menu.json`.
 - `public/assets/` - synced deploy copy of shared logo/background/icons/product-image directory.
-- `backend/` - FastAPI scaffold for future real order API work.
 - `tests/order-flow.spec.js` - browser smoke coverage for render counts, section alignment, URL cleanliness, cart, checkout delivery fields, delivery-fee totals, cursor, light-mode badge, and footer phone-link boundary.
 
 ## Runtime Behavior
@@ -64,7 +62,7 @@ As of this review, shared menu data, brand images, background pattern, icons, an
 7. Add buttons and plus/minus steppers update the cart. Product quantities are clamped from 0 to 99.
 8. The cart can open from the header cart button or compact mobile floating cart. Desktop uses a fixed cart panel; mobile uses a bottom sheet with backdrop and locks background scrolling while open. The mobile floating cart hides while the footer is visible so footer actions stay reachable.
 9. Checkout fields are name, phone, required neighborhood select, required `اسم الشارع .. أقرب علامة` text, required delivery service, optional notes, and a final-price row after notes. Phone input is numeric and must match `09XXXXXXXX`. Name accepts letters/spaces only.
-10. Submit is mocked with an `SS-######` confirmation number. There is no real order API call yet.
+10. After valid checkout, the app opens a WhatsApp click-to-chat link to `0944848659` in international format with the order details prepared. The customer must press WhatsApp Send manually. The app also shows an `SS-######` local confirmation number.
 11. Back-to-top appears after scrolling past 240px and hides while the footer is visible.
 
 ## Checkout Delivery Fields
@@ -92,7 +90,7 @@ The ordering app should match `../sahseh_menu` for shared visual surfaces:
 - Buttons should show the normal pointer cursor on hover when enabled.
 - Keep Arabic RTL layout and Tajawal font.
 
-Ordering-only UI may differ where necessary: add buttons, plus/minus controls, cart/list panel, totals, checkout fields, validation messages, and mock confirmation.
+Ordering-only UI may differ where necessary: add buttons, plus/minus controls, cart/list panel, totals, checkout fields, validation messages, and WhatsApp checkout confirmation.
 
 ## Data Contract
 
@@ -132,14 +130,6 @@ npm run dev
 
 Open the local Vite URL shown in the terminal, usually `http://127.0.0.1:5173`.
 
-Backend scaffold, for future backend work only:
-
-```powershell
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-pip install -r backend\requirements.txt
-uvicorn backend.app.main:app --reload
-```
 
 ## Validation
 
@@ -165,16 +155,3 @@ Current Playwright expectations include:
 - Footer phone text link is limited to the phone text area.
 
 For shared data/assets, also run the source validation script from `../sahseh_source` after syncing source changes.
-
-## Backend Later
-
-Not implemented yet:
-
-- Real order submission.
-- Database.
-- Restaurant dashboard.
-- Admin login.
-- Order status updates.
-- Delivery notification or delivery integration.
-
-Do not start these phases unless the user explicitly asks.
