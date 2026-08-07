@@ -2339,3 +2339,10 @@ button:disabled {
   background: var(--panel);
   box-shadow: 0 24px 70px rgba(33, 24, 23, 0.28);
 }
+
+.order-review-actions > button {
+  width: 100%;
+  min-height: 2.65rem;
+  box-sizing: border-box;
+  border-radius: 0.65rem;
+}

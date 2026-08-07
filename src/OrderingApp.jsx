@@ -132,21 +132,25 @@ function buildWhatsAppOrderMessage(form, cartItems, finalTotal) {
     `${product.name} عدد ${quantity} = ${formatTotal(productPrice(product) * quantity)}`
   ).join("\n");
 
-  return [
-    "طلب جديد من صَح صِح",
-    "",
+  const customerSection = [
     `الاسم: ${form.name}`,
     `رقم الهاتف: ${form.phone}`,
     `المنطقة: ${form.neighborhood}`,
     `الموقع بالتحديد: ${form.streetAddress}`,
-    `خدمة التوصيل: ${deliveryCompanyName(form.deliveryCompany)}`,
-    "",
-    "الطلبات:",
-    items,
-    "",
+    `خدمة التوصيل: ${deliveryCompanyName(form.deliveryCompany)}`
+  ].join("\n");
+
+  const totalSection = [
     `السعر النهائي متضمن التوصيل: ${formatTotal(finalTotal)}`,
     form.notes ? `ملاحظات: ${form.notes}` : ""
-  ].filter(Boolean).join("\n\n");
+  ].filter(Boolean).join("\n");
+
+  return [
+    "طلب جديد من صَح صِح",
+    customerSection,
+    ["الطلبات:", items].join("\n"),
+    totalSection
+  ].join("\n\n");
 }
 
 function openWhatsAppOrder(message, deliveryCompany) {
