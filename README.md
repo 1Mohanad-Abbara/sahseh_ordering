@@ -70,10 +70,10 @@ As of this review, shared menu data, brand images, background pattern, icons, an
 ## Checkout Delivery Fields
 
 - Neighborhood selection is required and sorted with Arabic locale ordering. It is shown as a select-style list with no visible search field; typing while the list is focused filters by any substring. For example, typing `عر` should show `وعر`.
-- Current neighborhoods are: ادخار، انشائات، باب سباع، بابا عمرو، جميدية، جورة الشياح، حضارة، حمرا، خالدية، دبلان، شبابية، غوطة، قصور، كرم الشامي، كرم اللوز، ميدان، وادي الذهب، وعر.
+- Current neighborhoods are: ادخار، انشاءات، باب سباع، بابا عمرو، جورة الشياح، حضارة، حمرا، خالدية، دبلان، شبابية، غوطة، قصور، كرم الشامي، كرم اللوز، الملعب، ميدان، الحميدية، وادي الذهب، وعر.
 - Street/nearest-landmark text is required and is labeled `اسم الشارع .. أقرب علامة`.
 - Delivery service selection is required, labeled `خدمة التوصيل`, and must be exactly one of `5G`, `Tbsher - تبشر`, or `Fast Delivery`.
-- Current delivery fees are `5G` = `100.00`, `Tbsher - تبشر` = `200.00`, and `Fast Delivery` = `300.00`.
+- Delivery pricing is represented by a neighborhood-by-company matrix in `src/OrderingApp.jsx`. Every neighborhood has a separate slot for each delivery company. Temporary values are currently `100.00`, `200.00`, and `300.00` per company slot and can be replaced with the real pair-specific prices later.
 - `src/OrderingApp.jsx` keeps a delivery area data structure with a per-company `deliveryPrices` slot for every neighborhood, so future pricing can differ by neighborhood and company.
 - The final price row appears after notes and shows only the combined product subtotal plus selected delivery service fee. Delivery fees are used in the calculation but are not shown beside company names.
 
@@ -161,7 +161,7 @@ Current Playwright expectations include:
 - Back-to-top hover keeps the same colors in light and dark mode and scales slightly on desktop hover.
 - Light-mode header cart count badge is white.
 - Desktop cart opens, closes, and preserves entered checkout data, including selected neighborhood, `اسم الشارع .. أقرب علامة`, delivery service, and delivery-fee final total.
-- Mobile add-to-cart and checkout validation work, including the compact floating cart hiding at the footer, locked background scrolling while the cart sheet is open, select-only substring-filtered neighborhood selection, `اسم الشارع .. أقرب علامة`, exactly one delivery service, and final total with delivery fee.
+- Mobile add-to-cart and checkout validation work, including the compact floating cart hiding at the footer, locked background scrolling while the cart sheet is open, select-only substring-filtered neighborhood selection, `اسم الشارع .. أقرب علامة`, exactly one delivery service, neighborhood/company-specific delivery pricing, and final total with delivery fee.
 - Footer phone text link is limited to the phone text area.
 
 For shared data/assets, also run the source validation script from `../sahseh_source` after syncing source changes.

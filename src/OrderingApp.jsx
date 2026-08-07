@@ -12,9 +12,9 @@ const EMPTY_FORM = {
   notes: ""
 };
 const DELIVERY_COMPANIES = [
-  { id: "5g", name: "5G", deliveryFee: 100 },
-  { id: "tbsher", name: "Tbsher - تبشر", deliveryFee: 200 },
-  { id: "fast-delivery", name: "Fast Delivery", deliveryFee: 300 }
+  { id: "5g", name: "5G" },
+  { id: "tbsher", name: "Tbsher - تبشر" },
+  { id: "fast-delivery", name: "Fast Delivery" }
 ];
 const NEIGHBORHOODS = [
   "حمرا",
@@ -27,21 +27,19 @@ const NEIGHBORHOODS = [
   "جورة الشياح",
   "قصور",
   "خالدية",
-  "انشائات",
+  "انشاءات",
   "ميدان",
-  "جميدية",
+  "الحميدية",
   "باب سباع",
   "حضارة",
   "ادخار",
   "شبابية",
-  "بابا عمرو"
+  "بابا عمرو",
+  "الملعب"
 ].sort((first, second) => first.localeCompare(second, "ar-SY"));
 const DELIVERY_AREAS = NEIGHBORHOODS.map((name) => ({
   name,
-  deliveryPrices: DELIVERY_COMPANIES.reduce((prices, company) => {
-    prices[company.id] = company.deliveryFee;
-    return prices;
-  }, {})
+  deliveryPrices: { "5g": 100, tbsher: 200, "fast-delivery": 300 }
 }));
 const PHONE_LENGTH = 10;
 const THEME_STORAGE_KEY = "sahseh-menu-theme";
@@ -93,8 +91,8 @@ function isKnownDeliveryCompany(value) {
   return DELIVERY_COMPANIES.some((company) => company.id === value);
 }
 
-function deliveryFeeForCompany(value) {
-  return DELIVERY_COMPANIES.find((company) => company.id === value)?.deliveryFee || 0;
+function deliveryFeeForSelection(neighborhood, company) {
+  return DELIVERY_AREAS.find((area) => area.name === neighborhood)?.deliveryPrices[company] || 0;
 }
 
 function orderedItems(items = []) {
@@ -827,7 +825,7 @@ export default function OrderingApp() {
     () => cartItems.reduce((total, item) => total + productPrice(item.product) * item.quantity, 0),
     [cartItems]
   );
-  const deliveryFee = deliveryFeeForCompany(form.deliveryCompany);
+  const deliveryFee = deliveryFeeForSelection(form.neighborhood, form.deliveryCompany);
   const finalTotal = cartTotal + deliveryFee;
 
   const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);

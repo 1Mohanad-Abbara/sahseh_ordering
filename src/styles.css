@@ -1024,6 +1024,7 @@ body.cart-open {
   line-height: 1;
   padding: 0 0 0.18rem;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   opacity: 0;
   pointer-events: none;
   transform: translateY(0.45rem);
@@ -1656,6 +1657,7 @@ button:disabled {
 }
 
 .delivery-option {
+  -webkit-tap-highlight-color: transparent;
   min-height: 2.55rem;
   display: flex;
   align-items: center;
@@ -1689,6 +1691,34 @@ button:disabled {
   direction: ltr;
   font-size: 0.9rem;
   font-weight: 900;
+}
+
+.delivery-option:active {
+  border-color: inherit;
+  background: inherit;
+  color: inherit;
+  box-shadow: none;
+  transform: none;
+}
+
+:root[data-theme="light"] .floating-cart {
+  border-color: transparent;
+  background: var(--brand-red);
+  color: #fff;
+  box-shadow: 0 14px 34px rgba(120, 15, 18, 0.28);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .floating-cart.is-visible:hover {
+    background: #060505;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.48);
+    transform: translateY(0) scale(1.08);
+  }
+
+  :root[data-theme="light"] .floating-cart.is-visible:hover {
+    background: var(--brand-red);
+    box-shadow: 0 14px 34px rgba(120, 15, 18, 0.28);
+  }
 }
 
 .delivery-option.is-selected {
@@ -1764,12 +1794,13 @@ button:disabled {
   display: inline-grid;
   place-items: center;
   padding: 0;
-  border: 0;
+  border: 1px solid var(--accent-line-strong);
   border-radius: 50%;
-  background: var(--brand-red);
-  color: #fff;
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
+  background: #060505;
+  color: var(--bar-text);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.48);
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   opacity: 0;
   pointer-events: none;
   transform: translateY(0.45rem);
@@ -2147,5 +2178,17 @@ button:disabled {
   .add-button,
   .product-list .quantity-stepper {
     justify-self: end;
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .floating-cart.is-visible:hover {
+    background: #060505;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.48);
+    transform: translateY(0) scale(1.08);
+  }
+
+  :root[data-theme="light"] .floating-cart.is-visible:hover {
+    background: var(--brand-red);
+    box-shadow: 0 14px 34px rgba(120, 15, 18, 0.28);
   }
 }

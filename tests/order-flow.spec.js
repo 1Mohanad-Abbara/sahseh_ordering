@@ -51,7 +51,7 @@ test("desktop renders the ordering menu, aligns hash sections, toggles cart, kee
   const streetInput = page.locator('textarea[name="streetAddress"]');
   await expect(page.locator('input[name="neighborhoodSearch"]')).toHaveCount(0);
   await neighborhoodSelect.click();
-  await expect(page.locator(".neighborhood-option")).toHaveCount(18);
+  await expect(page.locator(".neighborhood-option")).toHaveCount(19);
   const neighborhoodOptions = (await page.locator(".neighborhood-option").allTextContents()).map((text) => text.trim());
   expect(neighborhoodOptions).toEqual([...neighborhoodOptions].sort((first, second) => first.localeCompare(second, "ar-SY")));
   await typeNeighborhoodFilter(neighborhoodSelect, "عر");
