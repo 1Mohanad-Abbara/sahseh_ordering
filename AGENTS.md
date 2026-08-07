@@ -79,7 +79,7 @@ As of this review, shared menu data, brand images, background pattern, icons, an
 
 The ordering app should match `../sahseh_menu` for shared visual surfaces:
 
-- Dark mode is the default.
+- Light mode is the default for first-time visitors.
 - Light mode is controlled by `html[data-theme="light"]`.
 - Theme preference is stored in `localStorage["sahseh-menu-theme"]`, shared with the static menu.
 - Header, footer, logo treatment, menu cards, section controls, section icons, price slots, product modal shell, and back-to-top button should stay visually aligned with `../sahseh_menu`.
@@ -162,7 +162,7 @@ For shared data/assets, also run the source validation script from `../sahseh_so
 - Shared menu data and visual assets are deploy copies from `../sahseh_source`. Preserve the shared visual parity with `../sahseh_menu` and do not replace this app with the static site.
 - Checkout currently supports 19 sorted neighborhoods, substring filtering while the select list is focused, the required `الموقع بالتحديد` field with its existing placeholder, and exactly one delivery company.
 - Delivery pricing is stored in a neighborhood-by-company matrix. Current temporary values are integer placeholders `100`, `200`, and `300`; they are internal calculation values and are never shown beside company names.
-- Each delivery company has its own `whatsappNumber` field. All three currently use the same international placeholder number `963944848659` until real company numbers are supplied.
+- Each delivery company has its own `whatsappNumber` field. All three currently use the same international placeholder number `963930944255` until real company numbers are supplied.
 - The submit flow validates the form, opens a review popup, preserves cart/form state on `عودة`, and opens the selected company WhatsApp chat only after `تأكيد`. After that, the cart is cleared and a `تم تأكيد الطلب` popup offers `طلب جديد`, which resets the form and returns to the top of the menu.
 - WhatsApp message sections are separated by one blank line. The `الطلبات:` section is immediately followed by products, with each product on its own consecutive line using `اسم المنتج عدد X = السعر`. The final line is `السعر النهائي متضمن التوصيل`.
 - Preserve mobile background scroll locking while cart or modal overlays are open, desktop/light/dark hover behavior, equal review-popup button sizing, and the existing product/cart accessibility behavior.

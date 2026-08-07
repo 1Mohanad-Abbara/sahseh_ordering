@@ -13,9 +13,9 @@ const EMPTY_FORM = {
   notes: ""
 };
 const DELIVERY_COMPANIES = [
-  { id: "5g", name: "5G", whatsappNumber: "963944848659" },
-  { id: "tbsher", name: "Tbsher - تبشر", whatsappNumber: "963944848659" },
-  { id: "fast-delivery", name: "Fast Delivery", whatsappNumber: "963944848659" }
+  { id: "5g", name: "5G", whatsappNumber: "963930944255" },
+  { id: "tbsher", name: "Tbsher - تبشر", whatsappNumber: "963930944255" },
+  { id: "fast-delivery", name: "Fast Delivery", whatsappNumber: "963930944255" }
 ];
 const NEIGHBORHOODS = [
   "حمرا",
@@ -47,12 +47,12 @@ const THEME_STORAGE_KEY = "sahseh-menu-theme";
 const TEXT_ONLY_PATTERN = /^[\p{L}\p{M}\s]+$/u;
 
 function savedTheme() {
-  if (typeof window === "undefined") return "dark";
+  if (typeof window === "undefined") return "light";
 
   try {
-    return localStorage.getItem(THEME_STORAGE_KEY) === "light" ? "light" : "dark";
+    return localStorage.getItem(THEME_STORAGE_KEY) === "dark" ? "dark" : "light";
   } catch (error) {
-    return "dark";
+    return "light";
   }
 }
 
@@ -154,7 +154,7 @@ function buildWhatsAppOrderMessage(form, cartItems, finalTotal) {
 }
 
 function openWhatsAppOrder(message, deliveryCompany) {
-  const phone = DELIVERY_COMPANIES.find((company) => company.id === deliveryCompany)?.whatsappNumber || "963944848659";
+  const phone = DELIVERY_COMPANIES.find((company) => company.id === deliveryCompany)?.whatsappNumber || "963930944255";
   const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
   const link = document.createElement("a");
   link.href = url;

@@ -35,6 +35,9 @@ test("desktop renders the ordering menu, aligns hash sections, toggles cart, kee
   await expect(page.locator(".product-modal-heading")).not.toContainText(firstSectionTitle);
   await page.keyboard.press("Escape");
   await expect(page.locator(".section-nav button").first()).toHaveCSS("cursor", "pointer");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await page.locator(".theme-toggle").click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await page.locator(".theme-toggle").click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await expect(page.locator(".cart-trigger strong")).toHaveCSS("background-color", "rgb(255, 255, 255)");
@@ -155,7 +158,7 @@ test("mobile handles validation, delivery address, add to cart, and checkout con
   const popupPromise = page.waitForEvent("popup");
   await page.locator(".order-review-actions button", { hasText: "تأكيد" }).click();
   const whatsappPopup = await popupPromise;
-  await expect(whatsappPopup).toHaveURL(/(?:wa\.me\/963944848659|api\.whatsapp\.com\/send)/);
+  await expect(whatsappPopup).toHaveURL(/(?:wa\.me\/963930944255|api\.whatsapp\.com\/send)/);
   await expect(page.locator(".order-success-modal")).toBeVisible();
   await expect(page.locator(".order-success-panel")).toContainText("تم تأكيد الطلب");
   await page.locator(".order-success-panel button", { hasText: "طلب جديد" }).click();

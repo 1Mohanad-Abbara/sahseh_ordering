@@ -11,10 +11,11 @@
     <script>
       (() => {
         try {
-          if (localStorage.getItem("sahseh-menu-theme") === "light") {
-            document.documentElement.dataset.theme = "light";
-          }
-        } catch (error) {}
+          const storedTheme = localStorage.getItem("sahseh-menu-theme");
+          document.documentElement.dataset.theme = storedTheme === "dark" ? "dark" : "light";
+        } catch (error) {
+          document.documentElement.dataset.theme = "light";
+        }
       })();
     </script>
   </head>
