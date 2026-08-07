@@ -59,7 +59,7 @@ test("desktop renders the ordering menu, aligns hash sections, toggles cart, kee
   await page.locator(".neighborhood-option", { hasText: "وعر" }).click();
   await streetInput.fill("Homs 123, floor #5");
   await page.locator('input[name="deliveryCompany"][value="5g"]').check();
-  await expect(page.locator(".checkout-final")).toContainText("200.00");
+  await expect(page.locator(".checkout-final")).toContainText("200");
   await expect(page.locator(".checkout-final small")).toHaveCount(0);
   await expect(page.locator(".delivery-option b")).toHaveCount(0);
 
@@ -67,7 +67,7 @@ test("desktop renders the ordering menu, aligns hash sections, toggles cart, kee
   await expect(page.locator(".cart-panel")).not.toHaveClass(/is-open/);
   await page.locator(".cart-trigger").click();
   await expect(page.locator(".cart-panel")).toHaveClass(/is-open/);
-  await expect(page.getByText("اسم الشارع .. أقرب علامة", { exact: true })).toBeVisible();
+  await expect(page.getByText("الموقع بالتحديد", { exact: true })).toBeVisible();
   await expect(page.getByText("خدمة التوصيل", { exact: true })).toBeVisible();
   await expect(page.locator(".cart-panel")).toContainText("شاي");
   await expect(page.locator('input[name="name"]')).toHaveValue("Test");
@@ -112,7 +112,7 @@ test("mobile handles validation, delivery address, add to cart, and checkout con
   await page.locator(".floating-cart").click();
   await expect(page.locator("body")).toHaveClass(/cart-open/);
   await expect(page.locator(".cart-panel")).toContainText("شاي");
-  await expect(page.locator(".cart-total")).toContainText("100.00");
+  await expect(page.locator(".cart-total")).toContainText("100");
 
   const nameInput = page.locator('input[name="name"]');
   const phoneInput = page.locator('input[name="phone"]');
@@ -141,9 +141,23 @@ test("mobile handles validation, delivery address, add to cart, and checkout con
   await expect(page.locator(".neighborhood-option")).toHaveText("وعر");
   await page.locator(".neighborhood-option", { hasText: "وعر" }).click();
   await page.locator('input[name="deliveryCompany"][value="fast-delivery"]').check();
-  await expect(page.locator(".checkout-final")).toContainText("400.00");
+  await expect(page.locator(".checkout-final")).toContainText("400");
   await expect(page.locator(".checkout-submit")).toHaveText("تأكيد الطلب");
   await page.locator('textarea[name="notes"]').fill("Floor 2 #5, near door @ 9pm");
   await page.locator(".checkout-submit").click();
-  await expect(page.locator(".order-confirmation")).toContainText("SS-");
+  await expect(page.locator(".order-review-modal")).toBeVisible();
+  await expect(page.locator(".order-review-message")).toContainText("السعر النهائي متضمن التوصيل");
+  await page.locator(".order-review-actions button", { hasText: "عودة" }).click();
+  await expect(page.locator(".order-review-modal")).toHaveCount(0);
+  await expect(page.locator(".cart-panel")).toContainText("شاي");
+  await expect(streetInput).toHaveValue("Homs 123, floor #5");
+  await page.locator(".checkout-submit").click();
+  const popupPromise = page.waitForEvent("popup");
+  await page.locator(".order-review-actions button", { hasText: "تأكيد" }).click();
+  const whatsappPopup = await popupPromise;
+  await expect(whatsappPopup).toHaveURL(/(?:wa\.me\/963944848659|api\.whatsapp\.com\/send)/);
+  await expect(page.locator(".order-success-modal")).toBeVisible();
+  await expect(page.locator(".order-success-panel")).toContainText("تم تأكيد الطلب");
+  await page.locator(".order-success-panel button", { hasText: "طلب جديد" }).click();
+  await expect(page.locator(".order-success-modal")).toHaveCount(0);
 });

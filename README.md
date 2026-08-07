@@ -61,17 +61,17 @@ As of this review, shared menu data, brand images, background pattern, icons, an
 6. Product rows open the product modal when the product name/price area is clicked. The modal title shows only the product name, not the section title.
 7. Add buttons and plus/minus steppers update the cart. Product quantities are clamped from 0 to 99.
 8. The cart can open from the header cart button or compact mobile floating cart. Desktop uses a fixed cart panel; mobile uses a bottom sheet with backdrop and locks background scrolling while open. The mobile floating cart hides while the footer is visible so footer actions stay reachable.
-9. Checkout fields are name, phone, required neighborhood select, required `اسم الشارع .. أقرب علامة` text, required delivery service, optional notes, and a final-price row after notes. Phone input is numeric and must match `09XXXXXXXX`. Name accepts letters/spaces only.
-10. After valid checkout, the app opens a WhatsApp click-to-chat link to `0944848659` in international format with the order details prepared. The customer must press WhatsApp Send manually. The app also shows an `SS-######` local confirmation number.
+9. Checkout fields are name, phone, required neighborhood select, required `الموقع بالتحديد` text, required delivery service, optional notes, and a final-price row after notes. Phone input is numeric and must match `09XXXXXXXX`. Name accepts letters/spaces only.
+10. After valid checkout, a final review popup shows the same order information and `السعر النهائي متضمن التوصيل`. `عودة` preserves the cart and form; `تأكيد` opens the selected company WhatsApp chat with the order prepared, then clears the cart and shows `تم تأكيد الطلب` with a `طلب جديد` button. The customer must press WhatsApp Send manually.
 11. Back-to-top appears after scrolling past 240px and hides while the footer is visible.
 
 ## Checkout Delivery Fields
 
 - Neighborhood selection is required and sorted with Arabic locale ordering. It is shown as a select-style list with no visible search field; typing while the list is focused filters by any substring. For example, typing `عر` should show `وعر`.
 - Current neighborhoods are: ادخار، انشاءات، باب سباع، بابا عمرو، جورة الشياح، حضارة، حمرا، خالدية، دبلان، شبابية، غوطة، قصور، كرم الشامي، كرم اللوز، الملعب، ميدان، الحميدية، وادي الذهب، وعر.
-- Street/nearest-landmark text is required and is labeled `اسم الشارع .. أقرب علامة`.
+- Street/nearest-landmark text is required and is labeled `الموقع بالتحديد`.
 - Delivery service selection is required, labeled `خدمة التوصيل`, and must be exactly one of `5G`, `Tbsher - تبشر`, or `Fast Delivery`.
-- Delivery pricing is represented by a neighborhood-by-company matrix in `src/OrderingApp.jsx`. Every neighborhood has a separate slot for each delivery company. Temporary values are currently `100.00`, `200.00`, and `300.00` per company slot and can be replaced with the real pair-specific prices later.
+- Delivery pricing is represented by a neighborhood-by-company matrix in `src/OrderingApp.jsx`. Every neighborhood has a separate slot for each delivery company. Each company also has its own `whatsappNumber` field; the three values currently share the same placeholder number until the real numbers are provided. Temporary values are currently `100`, `200`, and `300` per company slot and can be replaced with the real pair-specific prices later.
 - `src/OrderingApp.jsx` keeps a delivery area data structure with a per-company `deliveryPrices` slot for every neighborhood, so future pricing can differ by neighborhood and company.
 - The final price row appears after notes and shows only the combined product subtotal plus selected delivery service fee. Delivery fees are used in the calculation but are not shown beside company names.
 
@@ -150,8 +150,8 @@ Current Playwright expectations include:
 - Desktop hover effects work for category buttons, product rows, price slots, ordering buttons, icon buttons, and footer/header controls in dark and light mode.
 - Back-to-top hover keeps the same colors in light and dark mode and scales slightly on desktop hover.
 - Light-mode header cart count badge is white.
-- Desktop cart opens, closes, and preserves entered checkout data, including selected neighborhood, `اسم الشارع .. أقرب علامة`, delivery service, and delivery-fee final total.
-- Mobile add-to-cart and checkout validation work, including the compact floating cart hiding at the footer, locked background scrolling while the cart sheet is open, select-only substring-filtered neighborhood selection, `اسم الشارع .. أقرب علامة`, exactly one delivery service, neighborhood/company-specific delivery pricing, and final total with delivery fee.
+- Desktop cart opens, closes, and preserves entered checkout data, including selected neighborhood, `الموقع بالتحديد`, delivery service, and delivery-fee final total.
+- Mobile add-to-cart and checkout validation work, including the compact floating cart hiding at the footer, locked background scrolling while the cart sheet is open, select-only substring-filtered neighborhood selection, `الموقع بالتحديد`, exactly one delivery service, neighborhood/company-specific delivery pricing, and final total with delivery fee.
 - Footer phone text link is limited to the phone text area.
 
 For shared data/assets, also run the source validation script from `../sahseh_source` after syncing source changes.

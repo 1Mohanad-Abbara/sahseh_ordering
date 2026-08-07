@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 const BASE_URL = import.meta.env.BASE_URL || "/";
 const MENU_SOURCE = assetUrl("data/menu.json");
 const INGREDIENT_FALLBACK = "سيتم إضافة المكونات لاحقا.";
-const WHATSAPP_ORDER_NUMBER = "963944848659";
+
 const EMPTY_FORM = {
   name: "",
   phone: "",
@@ -13,9 +13,9 @@ const EMPTY_FORM = {
   notes: ""
 };
 const DELIVERY_COMPANIES = [
-  { id: "5g", name: "5G" },
-  { id: "tbsher", name: "Tbsher - تبشر" },
-  { id: "fast-delivery", name: "Fast Delivery" }
+  { id: "5g", name: "5G", whatsappNumber: "963944848659" },
+  { id: "tbsher", name: "Tbsher - تبشر", whatsappNumber: "963944848659" },
+  { id: "fast-delivery", name: "Fast Delivery", whatsappNumber: "963944848659" }
 ];
 const NEIGHBORHOODS = [
   "حمرا",
@@ -110,7 +110,7 @@ function isVisibleInOrdering(item) {
 
 function productPriceText(product) {
   if (product.priceText !== undefined && product.priceText !== null) return String(product.priceText);
-  if (Number.isFinite(Number(product.price))) return Number(product.price).toFixed(2);
+  if (Number.isFinite(Number(product.price))) return Number.isInteger(Number(product.price)) ? String(Number(product.price)) : Number(product.price).toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
   return "";
 }
 
@@ -119,7 +119,8 @@ function productPrice(product) {
 }
 
 function formatTotal(value) {
-  return Number(value || 0).toFixed(2);
+  const amount = Number(value || 0);
+  return Number.isInteger(amount) ? String(amount) : amount.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
 }
 
 function deliveryCompanyName(value) {
@@ -128,7 +129,7 @@ function deliveryCompanyName(value) {
 
 function buildWhatsAppOrderMessage(form, cartItems, finalTotal) {
   const items = cartItems.map(({ product, quantity }) =>
-    `- ${product.name} x${quantity} = ${formatTotal(productPrice(product) * quantity)}`
+    `${product.name} عدد ${quantity} = ${formatTotal(productPrice(product) * quantity)}`
   ).join("\n");
 
   return [
@@ -137,19 +138,20 @@ function buildWhatsAppOrderMessage(form, cartItems, finalTotal) {
     `الاسم: ${form.name}`,
     `رقم الهاتف: ${form.phone}`,
     `المنطقة: ${form.neighborhood}`,
-    `اسم الشارع .. أقرب علامة: ${form.streetAddress}`,
+    `الموقع بالتحديد: ${form.streetAddress}`,
     `خدمة التوصيل: ${deliveryCompanyName(form.deliveryCompany)}`,
     "",
     "الطلبات:",
     items,
     "",
-    `السعر النهائي: ${formatTotal(finalTotal)}`,
+    `السعر النهائي متضمن التوصيل: ${formatTotal(finalTotal)}`,
     form.notes ? `ملاحظات: ${form.notes}` : ""
-  ].filter(Boolean).join("\n");
+  ].filter(Boolean).join("\n\n");
 }
 
-function openWhatsAppOrder(message) {
-  const url = `https://wa.me/${WHATSAPP_ORDER_NUMBER}?text=${encodeURIComponent(message)}`;
+function openWhatsAppOrder(message, deliveryCompany) {
+  const phone = DELIVERY_COMPANIES.find((company) => company.id === deliveryCompany)?.whatsappNumber || "963944848659";
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
   const link = document.createElement("a");
   link.href = url;
   link.target = "_blank";
@@ -556,7 +558,7 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
         {formErrors.neighborhood ? <small>{formErrors.neighborhood}</small> : null}
       </div>
       <label className="field-label">
-        <span>اسم الشارع .. أقرب علامة</span>
+        <span>الموقع بالتحديد</span>
         <textarea
           name="streetAddress"
           value={form.streetAddress}
@@ -590,7 +592,7 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
         <textarea name="notes" value={form.notes} onChange={onChange} rows={2} placeholder="اختياري" />
       </label>
       <div className="checkout-final" aria-live="polite">
-        <span>السعر النهائي</span>
+        <span>السعر النهائي متضمن التوصيل</span>
         <strong>{formatTotal(finalTotal)}</strong>
       </div>
       <button className="primary-button checkout-submit" type="submit" disabled={disabled || isSubmitting}>
@@ -683,6 +685,38 @@ function CartPanel({
   );
 }
 
+function OrderReviewModal({ order, onBack, onConfirm }) {
+  if (!order) return null;
+
+  return (
+    <div className="order-review-modal" role="dialog" aria-modal="true" aria-labelledby="order-review-title">
+      <button className="order-review-backdrop" type="button" aria-label="عودة" onClick={onBack} />
+      <section className="order-review-panel">
+        <h2 id="order-review-title">معلومات الطلب</h2>
+        <pre className="order-review-message">{order.message}</pre>
+        <div className="order-review-actions">
+          <button className="secondary-button" type="button" onClick={onBack}>عودة</button>
+          <button className="primary-button" type="button" onClick={onConfirm}>تأكيد</button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function OrderSuccessModal({ open, onNewOrder }) {
+  if (!open) return null;
+
+  return (
+    <div className="order-success-modal" role="dialog" aria-modal="true" aria-labelledby="order-success-title">
+      <div className="order-success-backdrop" aria-hidden="true" />
+      <section className="order-success-panel">
+        <h2 id="order-success-title">تم تأكيد الطلب</h2>
+        <button className="primary-button" type="button" onClick={onNewOrder}>طلب جديد</button>
+      </section>
+    </div>
+  );
+}
+
 function Footer({ brand }) {
   return (
     <footer className="site-footer">
@@ -734,6 +768,7 @@ export default function OrderingApp() {
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedOrder, setSubmittedOrder] = useState("");
+  const [pendingOrder, setPendingOrder] = useState(null);
   const [backToTopVisible, setBackToTopVisible] = useState(false);
   const [footerVisible, setFooterVisible] = useState(false);
 
@@ -775,14 +810,14 @@ export default function OrderingApp() {
       }
     }
 
-    document.body.classList.toggle("modal-open", Boolean(activeProductId));
+    document.body.classList.toggle("modal-open", Boolean(activeProductId || pendingOrder || submittedOrder));
     document.addEventListener("keydown", handleKeyDown);
 
     return () => {
       document.body.classList.remove("modal-open");
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [activeProductId]);
+  }, [activeProductId, pendingOrder, submittedOrder]);
 
   useEffect(() => {
     function syncCartScrollLock() {
@@ -946,7 +981,7 @@ export default function OrderingApp() {
     }
 
     if (!streetAddress) {
-      errors.streetAddress = "اسم الشارع .. أقرب علامة مطلوب.";
+      errors.streetAddress = "الموقع بالتحديد مطلوب.";
     }
 
     if (!form.deliveryCompany) {
@@ -968,18 +1003,25 @@ export default function OrderingApp() {
 
     const confirmationNumber = `SS-${Date.now().toString().slice(-6)}`;
     const message = buildWhatsAppOrderMessage(form, cartItems, finalTotal);
-    setIsSubmitting(true);
-    openWhatsAppOrder(message);
-    setSubmittedOrder(confirmationNumber);
-    setIsSubmitting(false);
+    setPendingOrder({ confirmationNumber, message, deliveryCompany: form.deliveryCompany });
+  }
+
+  function handleConfirmOrder() {
+    if (!pendingOrder) return;
+
+    openWhatsAppOrder(pendingOrder.message, pendingOrder.deliveryCompany);
+    setSubmittedOrder(pendingOrder.confirmationNumber);
+    setPendingOrder(null);
     setCart({});
   }
 
   function handleNewOrder() {
     setSubmittedOrder("");
+    setPendingOrder(null);
     setForm(EMPTY_FORM);
     setFormErrors({});
     setCartOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function fixedOffset() {
@@ -1077,6 +1119,9 @@ export default function OrderingApp() {
       </button>
 
       {cartOpen ? <button className="cart-backdrop" type="button" aria-label="إغلاق السلة" onClick={() => setCartOpen(false)} /> : null}
+
+      <OrderReviewModal order={pendingOrder} onBack={() => setPendingOrder(null)} onConfirm={handleConfirmOrder} />
+      <OrderSuccessModal open={Boolean(submittedOrder)} onNewOrder={handleNewOrder} />
 
       <ProductModal
         product={activeProduct}
