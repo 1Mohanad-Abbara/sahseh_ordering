@@ -654,14 +654,17 @@ h1 {
 }
 
 .price-slot {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
+  min-width: 0;
   height: 2.1rem;
+  display: inline-grid;
+  place-items: center;
+  padding: 0.08rem 0.45rem 0;
   border: 1.5px dashed var(--accent-line-strong);
   border-radius: 0.55rem;
   background: #0d0b0a;
   color: var(--brand-red-dark);
+  font-family: Tahoma, Arial, "Segoe UI", sans-serif;
   font-weight: 900;
   line-height: 1;
   text-align: center;
@@ -797,13 +800,16 @@ body.cart-open {
   grid-area: price;
   min-width: 4.9rem;
   min-height: 2rem;
-  padding: 0.42rem 0.65rem;
+  display: inline-grid;
+  place-items: center;
+  padding: 0.48rem 0.65rem 0.36rem;
   border: 1.5px dashed var(--accent-line-strong);
   border-radius: 0.58rem;
   background: #0d0b0a;
   color: var(--brand-red-dark);
   direction: ltr;
   text-align: center;
+  font-family: Tahoma, Arial, "Segoe UI", sans-serif;
   font-weight: 900;
   line-height: 1;
 }
@@ -1010,25 +1016,34 @@ body.cart-open {
   z-index: 30;
   width: 3.15rem;
   height: 3.15rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
   border: 1px solid var(--accent-line-strong);
   border-radius: 50%;
   background: #060505;
   color: var(--bar-text);
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.48);
   font: inherit;
-  font-size: 1.9rem;
+  font-size: 0;
   font-weight: 1000;
   line-height: 1;
-  padding: 0 0 0.18rem;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   opacity: 0;
   pointer-events: none;
   transform: translateY(0.45rem);
   transition: opacity 160ms ease, transform 160ms ease, background 160ms ease;
+}
+
+.back-to-top::before {
+  content: "↑";
+  display: block;
+  font-family: Arial, "Segoe UI", sans-serif;
+  font-size: 1.9rem;
+  font-weight: 900;
+  line-height: 1;
+  transform: translateY(-0.02rem);
 }
 
 .back-to-top.is-visible {
@@ -1048,8 +1063,10 @@ body.cart-open {
     bottom: 0.75rem;
     width: 2.85rem;
     height: 2.85rem;
+  }
+
+  .back-to-top::before {
     font-size: 1.65rem;
-    padding-bottom: 0.16rem;
   }
 }
 
@@ -1275,6 +1292,63 @@ button:disabled {
   box-shadow: 0 10px 22px rgba(120, 15, 18, 0.18);
 }
 
+.add-button-compact {
+  width: 2.3rem;
+  min-width: 2.3rem;
+  height: 2.3rem;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 0;
+  line-height: 1;
+}
+
+.math-sign {
+  position: relative;
+  display: block;
+  width: 1.05rem;
+  height: 1.05rem;
+  color: currentColor;
+}
+
+.math-sign::before,
+.math-sign-plus::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: block;
+  border-radius: 999px;
+  background: currentColor;
+  transform: translate(-50%, -50%);
+}
+
+.math-sign::before {
+  width: 0.86rem;
+  height: 0.14rem;
+}
+
+.math-sign-plus::after {
+  width: 0.14rem;
+  height: 0.86rem;
+}
+
+.add-button-compact .math-sign {
+  width: 1.18rem;
+  height: 1.18rem;
+}
+
+.add-button-compact .math-sign::before {
+  width: 0.96rem;
+  height: 0.15rem;
+}
+
+.add-button-compact .math-sign-plus::after {
+  width: 0.15rem;
+  height: 0.96rem;
+}
+
 :root[data-theme="light"] .add-button {
   background: var(--brand-red);
 }
@@ -1302,8 +1376,14 @@ button:disabled {
 
 .quantity-stepper output {
   min-width: 1.7rem;
+  min-height: 2rem;
+  display: grid;
+  place-items: center;
+  padding-top: 0.08rem;
   color: var(--brand-red-dark);
+  font-family: Tahoma, Arial, "Segoe UI", sans-serif;
   font-weight: 900;
+  line-height: 1;
   text-align: center;
   direction: ltr;
 }
@@ -1311,18 +1391,36 @@ button:disabled {
 .icon-button {
   width: 2rem;
   height: 2rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-grid;
+  place-items: center;
   padding: 0;
   border: 1px solid var(--accent-line-strong);
   border-radius: 50%;
   background: rgba(237, 28, 35, 0.11);
   color: var(--brand-red-dark);
-  font-size: 1.25rem;
+  font-family: Arial, "Segoe UI", sans-serif;
+  font-size: 0;
   font-weight: 900;
   line-height: 1;
   cursor: pointer;
+}
+
+.control-sign {
+  display: block;
+  font-family: Arial, "Segoe UI", sans-serif;
+  font-size: 1.25rem;
+  line-height: 1;
+  transform: translateY(-0.02rem);
+}
+
+.cart-close .control-sign {
+  font-size: 1.5rem;
+  transform: translateY(-0.01rem);
+}
+
+.remove-button .control-sign {
+  font-size: 1.35rem;
+  transform: translateY(-0.01rem);
 }
 
 :root[data-theme="light"] .icon-button {
@@ -1401,7 +1499,6 @@ button:disabled {
 .cart-close {
   width: 2.3rem;
   height: 2.3rem;
-  font-size: 1.45rem;
 }
 
 .empty-cart,
@@ -1898,6 +1995,21 @@ button:disabled {
 .product-modal-actions .quantity-stepper .icon-button {
   width: 2.6rem;
   height: 2.6rem;
+}
+
+.product-modal-actions .quantity-stepper .math-sign {
+  width: 1.22rem;
+  height: 1.22rem;
+}
+
+.product-modal-actions .quantity-stepper .math-sign::before {
+  width: 1rem;
+  height: 0.15rem;
+}
+
+.product-modal-actions .quantity-stepper .math-sign-plus::after {
+  width: 0.15rem;
+  height: 1rem;
 }
 
 @media (hover: hover) and (pointer: fine) {

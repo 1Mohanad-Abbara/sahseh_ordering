@@ -62,7 +62,7 @@ As of this review, shared menu data, brand images, background pattern, icons, an
 7. Add buttons and plus/minus steppers update the cart. Product quantities are clamped from 0 to 99.
 8. The cart can open from the header cart button or compact mobile floating cart. Desktop uses a fixed cart panel; mobile uses a bottom sheet with backdrop and locks background scrolling while open. The mobile floating cart hides while the footer is visible so footer actions stay reachable.
 9. Checkout fields are name, phone, required neighborhood select, required `الموقع بالتحديد` text, required delivery service, optional notes, and a final-price row after notes. Phone input is numeric and must match `09XXXXXXXX`. Name accepts letters/spaces only.
-10. After valid checkout, a final review popup shows the same order information and `السعر النهائي متضمن التوصيل`. `عودة` preserves the cart and form; `تأكيد` opens the selected company WhatsApp chat with the order prepared, then clears the cart and shows `تم تأكيد الطلب` with a `طلب جديد` button. The customer must press WhatsApp Send manually.
+10. After valid checkout, a final review popup shows the same order information and `السعر المقدر متضمن التوصيل`. `عودة` preserves the cart and form; `تأكيد` opens the selected company WhatsApp chat with the order prepared, then clears the cart and shows `تم تأكيد الطلب` with a `طلب جديد` button. The customer must press WhatsApp Send manually.
 11. Back-to-top appears after scrolling past 240px and hides while the footer is visible.
 
 ## Checkout Delivery Fields
@@ -164,7 +164,7 @@ For shared data/assets, also run the source validation script from `../sahseh_so
 - Delivery pricing is stored in a neighborhood-by-company matrix. Current temporary values are integer placeholders `100`, `200`, and `300`; they are internal calculation values and are never shown beside company names.
 - Each delivery company has its own `whatsappNumber` field. All three currently use the same international placeholder number `963930944255` until real company numbers are supplied.
 - The submit flow validates the form, opens a review popup, preserves cart/form state on `عودة`, and opens the selected company WhatsApp chat only after `تأكيد`. After that, the cart is cleared and a `تم تأكيد الطلب` popup offers `طلب جديد`, which resets the form and returns to the top of the menu.
-- WhatsApp message sections are separated by one blank line. The `الطلبات:` section is immediately followed by products, with each product on its own consecutive line using `اسم المنتج عدد X = السعر`. The final line is `السعر النهائي متضمن التوصيل`.
+- WhatsApp message sections are separated by one blank line. The `الطلبات:` section is immediately followed by products, with each product on its own consecutive line using `اسم المنتج عدد X = السعر`. The final line is `السعر المقدر متضمن التوصيل`.
 - Preserve mobile background scroll locking while cart or modal overlays are open, desktop/light/dark hover behavior, equal review-popup button sizing, and the existing product/cart accessibility behavior.
 - Current smoke expectations are 13 categories, 13 sections, 104 products, 19 neighborhoods, delivery selection, review/back/confirm flow, WhatsApp popup opening, success popup, and new-order reset.
 - There is no backend, database, restaurant dashboard, or automatic WhatsApp send. The customer must press WhatsApp Send manually.

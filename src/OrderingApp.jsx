@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 const BASE_URL = import.meta.env.BASE_URL || "/";
 const MENU_SOURCE = assetUrl("data/menu.json");
 const INGREDIENT_FALLBACK = "سيتم إضافة المكونات لاحقا.";
+const ESTIMATED_TOTAL_LABEL = "السعر المقدر متضمن التوصيل";
 
 const EMPTY_FORM = {
   name: "",
@@ -32,9 +33,11 @@ const NEIGHBORHOODS = [
   "ميدان",
   "الحميدية",
   "باب سباع",
+  "بياضة",
   "حضارة",
   "ادخار",
   "شبابية",
+  "قرابيص",
   "بابا عمرو",
   "الملعب"
 ].sort((first, second) => first.localeCompare(second, "ar-SY"));
@@ -141,7 +144,7 @@ function buildWhatsAppOrderMessage(form, cartItems, finalTotal) {
   ].join("\n");
 
   const totalSection = [
-    `السعر النهائي متضمن التوصيل: ${formatTotal(finalTotal)}`,
+    `${ESTIMATED_TOTAL_LABEL}: ${formatTotal(finalTotal)}`,
     form.notes ? `ملاحظات: ${form.notes}` : ""
   ].filter(Boolean).join("\n");
 
@@ -205,11 +208,11 @@ function QuantityStepper({ value, onIncrement, onDecrement, decrementLabel, incr
   return (
     <div className="quantity-stepper" aria-label="الكمية">
       <IconButton label={decrementLabel} onClick={onDecrement} disabled={disabled || value <= 0}>
-        <span aria-hidden="true">-</span>
+        <span className="math-sign math-sign-minus" aria-hidden="true" />
       </IconButton>
       <output>{value}</output>
       <IconButton label={incrementLabel} onClick={onIncrement} disabled={disabled}>
-        <span aria-hidden="true">+</span>
+        <span className="math-sign math-sign-plus" aria-hidden="true" />
       </IconButton>
     </div>
   );
@@ -300,8 +303,14 @@ function ProductRow({ product, quantity, onOpen, onAdd, onIncrease, onDecrease }
           disabled={!available}
         />
       ) : (
-        <button className="add-button" type="button" onClick={onAdd} disabled={!available}>
-          {available ? "إضافة" : "غير متوفر"}
+        <button
+          className={`add-button ${available ? "add-button-compact" : ""}`.trim()}
+          type="button"
+          onClick={onAdd}
+          disabled={!available}
+          aria-label={available ? `إضافة ${product.name} إلى السلة` : undefined}
+        >
+          {available ? <span className="math-sign math-sign-plus" aria-hidden="true" /> : "غير متوفر"}
         </button>
       )}
     </li>
@@ -400,7 +409,7 @@ function CartLine({ item, onIncrease, onDecrease, onRemove }) {
           incrementLabel={`زيادة ${item.product.name}`}
         />
         <IconButton label={`حذف ${item.product.name}`} className="remove-button" onClick={onRemove}>
-          <span aria-hidden="true">x</span>
+          <span className="control-sign" aria-hidden="true">×</span>
         </IconButton>
       </div>
     </li>
@@ -596,7 +605,7 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
         <textarea name="notes" value={form.notes} onChange={onChange} rows={2} placeholder="اختياري" />
       </label>
       <div className="checkout-final" aria-live="polite">
-        <span>السعر النهائي متضمن التوصيل</span>
+        <span>{ESTIMATED_TOTAL_LABEL}</span>
         <strong>{formatTotal(finalTotal)}</strong>
       </div>
       <button className="primary-button checkout-submit" type="submit" disabled={disabled || isSubmitting}>
@@ -634,7 +643,7 @@ function CartPanel({
           <strong>{items.reduce((sum, item) => sum + item.quantity, 0)} منتج</strong>
         </div>
         <IconButton label="إغلاق السلة" className="cart-close" onClick={onClose}>
-          <span aria-hidden="true">x</span>
+          <span className="control-sign" aria-hidden="true">×</span>
         </IconButton>
       </div>
 

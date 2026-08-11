@@ -54,7 +54,7 @@ test("desktop renders the ordering menu, aligns hash sections, toggles cart, kee
   const streetInput = page.locator('textarea[name="streetAddress"]');
   await expect(page.locator('input[name="neighborhoodSearch"]')).toHaveCount(0);
   await neighborhoodSelect.click();
-  await expect(page.locator(".neighborhood-option")).toHaveCount(19);
+  await expect(page.locator(".neighborhood-option")).toHaveCount(21);
   const neighborhoodOptions = (await page.locator(".neighborhood-option").allTextContents()).map((text) => text.trim());
   expect(neighborhoodOptions).toEqual([...neighborhoodOptions].sort((first, second) => first.localeCompare(second, "ar-SY")));
   await typeNeighborhoodFilter(neighborhoodSelect, "عر");
@@ -149,7 +149,7 @@ test("mobile handles validation, delivery address, add to cart, and checkout con
   await page.locator('textarea[name="notes"]').fill("Floor 2 #5, near door @ 9pm");
   await page.locator(".checkout-submit").click();
   await expect(page.locator(".order-review-modal")).toBeVisible();
-  await expect(page.locator(".order-review-message")).toContainText("السعر النهائي متضمن التوصيل");
+  await expect(page.locator(".order-review-message")).toContainText("السعر المقدر متضمن التوصيل");
   await page.locator(".order-review-actions button", { hasText: "عودة" }).click();
   await expect(page.locator(".order-review-modal")).toHaveCount(0);
   await expect(page.locator(".cart-panel")).toContainText("شاي");
