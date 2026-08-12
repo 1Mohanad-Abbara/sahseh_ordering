@@ -1601,10 +1601,6 @@ button:disabled {
   direction: ltr;
 }
 
-.remove-button {
-  color: var(--muted);
-  border-color: var(--line);
-}
 
 .cart-total {
   margin-top: 0.1rem;
