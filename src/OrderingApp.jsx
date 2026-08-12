@@ -241,6 +241,15 @@ function ThemeToggle({ theme, onToggle }) {
   );
 }
 
+function CartIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M7 3h10a2 2 0 0 1 2 2v16l-3-1.5L13 21l-3-1.5L7 21l-2-1V5a2 2 0 0 1 2-2Z" />
+      <path d="M9 8h6M9 12h6M9 16h4" />
+    </svg>
+  );
+}
+
 function Header({ brand, itemCount, cartOpen, onCartToggle, theme, onThemeToggle }) {
   return (
     <header className="site-header">
@@ -260,10 +269,7 @@ function Header({ brand, itemCount, cartOpen, onCartToggle, theme, onThemeToggle
           aria-label={cartOpen ? "إخفاء السلة" : "فتح السلة"}
           aria-expanded={cartOpen}
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M7 3h10a2 2 0 0 1 2 2v16l-3-1.5L13 21l-3-1.5L7 21l-2-1V5a2 2 0 0 1 2-2Z" />
-            <path d="M9 8h6M9 12h6M9 16h4" />
-          </svg>
+          <CartIcon />
           <strong>{itemCount}</strong>
         </button>
       </div>
@@ -416,6 +422,17 @@ function CartLine({ item, onIncrease, onDecrease, onRemove }) {
   );
 }
 
+function CheckoutField({ label, error, as: Control = "input", ...props }) {
+  const invalidProps = error === undefined ? {} : { "aria-invalid": Boolean(error) };
+
+  return (
+    <label className="field-label">
+      <span>{label}</span>
+      <Control {...invalidProps} {...props} />
+      {error ? <small>{error}</small> : null}
+    </label>
+  );
+}
 function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disabled, finalTotal }) {
   const [neighborhoodOpen, setNeighborhoodOpen] = useState(false);
   const [neighborhoodFilter, setNeighborhoodFilter] = useState("");
@@ -503,34 +520,28 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
 
   return (
     <form className="checkout-form" onSubmit={onSubmit} noValidate>
-      <label className="field-label">
-        <span>الاسم</span>
-        <input
-          name="name"
-          type="text"
-          value={form.name}
-          onChange={onChange}
-          autoComplete="name"
-          aria-invalid={Boolean(formErrors.name)}
-          placeholder="اسم المستلم"
-        />
-        {formErrors.name ? <small>{formErrors.name}</small> : null}
-      </label>
-      <label className="field-label">
-        <span>رقم الهاتف</span>
-        <input
-          name="phone"
-          type="tel"
-          value={form.phone}
-          onChange={onChange}
-          autoComplete="tel"
-          inputMode="numeric"
-          dir="ltr"
-          aria-invalid={Boolean(formErrors.phone)}
-          placeholder="09XXXXXXXX"
-        />
-        {formErrors.phone ? <small>{formErrors.phone}</small> : null}
-      </label>
+      <CheckoutField
+        label="الاسم"
+        name="name"
+        type="text"
+        value={form.name}
+        onChange={onChange}
+        autoComplete="name"
+        error={formErrors.name}
+        placeholder="اسم المستلم"
+      />
+      <CheckoutField
+        label="رقم الهاتف"
+        name="phone"
+        type="tel"
+        value={form.phone}
+        onChange={onChange}
+        autoComplete="tel"
+        inputMode="numeric"
+        dir="ltr"
+        error={formErrors.phone}
+        placeholder="09XXXXXXXX"
+      />
       <div className="field-label neighborhood-field">
         <span>المنطقة</span>
         <div className="neighborhood-picker" ref={neighborhoodPickerRef} onKeyDown={handleNeighborhoodKeyDown}>
@@ -570,18 +581,16 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
         </div>
         {formErrors.neighborhood ? <small>{formErrors.neighborhood}</small> : null}
       </div>
-      <label className="field-label">
-        <span>الموقع بالتحديد</span>
-        <textarea
-          name="streetAddress"
-          value={form.streetAddress}
-          onChange={onChange}
-          rows={3}
-          aria-invalid={Boolean(formErrors.streetAddress)}
-          placeholder="اسم الشارع ، أقرب علامة"
-        />
-        {formErrors.streetAddress ? <small>{formErrors.streetAddress}</small> : null}
-      </label>
+      <CheckoutField
+        as="textarea"
+        label="الموقع بالتحديد"
+        name="streetAddress"
+        value={form.streetAddress}
+        onChange={onChange}
+        rows={3}
+        error={formErrors.streetAddress}
+        placeholder="اسم الشارع ، أقرب علامة"
+      />
       <fieldset className="delivery-field" aria-invalid={Boolean(formErrors.deliveryCompany)}>
         <legend>خدمة التوصيل</legend>
         <div className="delivery-options">
@@ -600,10 +609,7 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
         </div>
         {formErrors.deliveryCompany ? <small>{formErrors.deliveryCompany}</small> : null}
       </fieldset>
-      <label className="field-label">
-        <span>ملاحظات</span>
-        <textarea name="notes" value={form.notes} onChange={onChange} rows={2} placeholder="اختياري" />
-      </label>
+      <CheckoutField as="textarea" label="ملاحظات" name="notes" value={form.notes} onChange={onChange} rows={2} placeholder="اختياري" />
       <div className="checkout-final" aria-live="polite">
         <span>{ESTIMATED_TOTAL_LABEL}</span>
         <strong>{formatTotal(finalTotal)}</strong>
@@ -619,7 +625,6 @@ function CartPanel({
   open,
   items,
   total,
-  deliveryFee,
   finalTotal,
   form,
   formErrors,
@@ -689,7 +694,6 @@ function CartPanel({
             onChange={onFormChange}
             onSubmit={onSubmit}
             disabled={empty}
-            deliveryFee={deliveryFee}
             finalTotal={finalTotal}
           />
         </>
@@ -1093,7 +1097,6 @@ export default function OrderingApp() {
             open={cartOpen}
             items={cartItems}
             total={cartTotal}
-            deliveryFee={deliveryFee}
             finalTotal={finalTotal}
             form={form}
             formErrors={formErrors}
@@ -1116,10 +1119,7 @@ export default function OrderingApp() {
         onClick={() => setCartOpen(true)}
         aria-label={`فتح السلة - ${itemCount} عناصر - ${formatTotal(finalTotal)}`}
       >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M7 3h10a2 2 0 0 1 2 2v16l-3-1.5L13 21l-3-1.5L7 21l-2-1V5a2 2 0 0 1 2-2Z" />
-          <path d="M9 8h6M9 12h6M9 16h4" />
-        </svg>
+        <CartIcon />
         <strong>{itemCount}</strong>
       </button>
       <button
