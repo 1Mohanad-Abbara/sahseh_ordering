@@ -149,6 +149,8 @@ test("mobile handles validation, delivery address, add to cart, and checkout con
   await page.locator('textarea[name="notes"]').fill("Floor 2 #5, near door @ 9pm");
   await page.locator(".checkout-submit").click();
   await expect(page.locator(".order-review-modal")).toBeVisible();
+  await expect(page.locator(".order-review-message")).toContainText("🧾 طلب جديد من صَح صِح");
+  await expect(page.locator(".order-review-message")).toContainText("🚚 خدمة التوصيل");
   await expect(page.locator(".order-review-message")).toContainText("السعر المقدر متضمن التوصيل");
   await page.locator(".order-review-actions button", { hasText: "عودة" }).click();
   await expect(page.locator(".order-review-modal")).toHaveCount(0);

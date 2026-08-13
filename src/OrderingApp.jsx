@@ -136,20 +136,20 @@ function buildWhatsAppOrderMessage(form, cartItems, finalTotal) {
   ).join("\n");
 
   const customerSection = [
-    `الاسم: ${form.name}`,
-    `رقم الهاتف: ${form.phone}`,
-    `المنطقة: ${form.neighborhood}`,
-    `الموقع بالتحديد: ${form.streetAddress}`,
-    `خدمة التوصيل: ${deliveryCompanyName(form.deliveryCompany)}`
+    `👤 الاسم: ${form.name}`,
+    `📞 رقم الهاتف: ${form.phone}`,
+    `📍 المنطقة: ${form.neighborhood}`,
+    `🏠 الموقع بالتحديد: ${form.streetAddress}`,
+    `🚚 خدمة التوصيل: ${deliveryCompanyName(form.deliveryCompany)}`
   ].join("\n");
 
   const totalSection = [
     `${ESTIMATED_TOTAL_LABEL}: ${formatTotal(finalTotal)}`,
-    form.notes ? `ملاحظات: ${form.notes}` : ""
+    form.notes ? `📝 ملاحظات: ${form.notes}` : ""
   ].filter(Boolean).join("\n");
 
   return [
-    "طلب جديد من صَح صِح",
+    "🧾 طلب جديد من صَح صِح",
     customerSection,
     ["الطلبات:", items].join("\n"),
     totalSection
@@ -712,7 +712,7 @@ function OrderSuccessModal({ open, onBack, onNewOrder }) {
     <div className="order-success-modal" role="dialog" aria-modal="true" aria-labelledby="order-success-title">
       <div className="order-success-backdrop" aria-hidden="true" />
       <section className="order-success-panel">
-        <h2 id="order-success-title">تم تأكيد الطلب</h2>
+        <h2 id="order-success-title">تم تأكيد الطلب ✅</h2>
         <div className="order-review-actions">
           <button className="secondary-button" type="button" onClick={onBack}>العودة</button>
           <button className="primary-button" type="button" onClick={onNewOrder}>طلب جديد</button>
