@@ -16,8 +16,35 @@ const EMPTY_FORM = {
 const DELIVERY_COMPANIES = [
   { id: "5g", name: "5G", whatsappNumber: "963930944255" },
   { id: "tbsher", name: "Tbsher - تبشر", whatsappNumber: "963930944255" },
-  { id: "fast-delivery", name: "Fast Delivery", whatsappNumber: "963930944255" }
+  { id: "fast-delivery", name: "Fast Delivery", whatsappNumber: "963958515311" }
 ];
+const FAST_DELIVERY_PRICES = {
+  "ادخار": 290,
+  "بابا عمرو": 290,
+  "وعر": 290,
+  "شبابية": 290,
+  "بياضة": 290,
+  "وادي الذهب": 290,
+  "كرم اللوز": 290,
+  "خالدية": 290,
+  "السكن الجامعي": 290,
+  "غوطة": 230,
+  "حمرا": 230,
+  "دبلان": 230,
+  "جورة الشياح": 230,
+  "انشاءات": 230,
+  "قرابيص": 230,
+  "الحميدية": 230,
+  "الملعب": 230,
+  "قصور": 230,
+  "ميدان": 200,
+  "حضارة": 200,
+  "كرم الشامي": 200,
+  "خضر": 200,
+  "المحطة": 200,
+  "مشفى الجامعة": 210,
+  "اوراس": 650
+};
 const NEIGHBORHOODS = [
   "حمرا",
   "غوطة",
@@ -39,11 +66,16 @@ const NEIGHBORHOODS = [
   "شبابية",
   "قرابيص",
   "بابا عمرو",
-  "الملعب"
+  "الملعب",
+  "السكن الجامعي",
+  "خضر",
+  "المحطة",
+  "مشفى الجامعة",
+  "اوراس"
 ].sort((first, second) => first.localeCompare(second, "ar-SY"));
 const DELIVERY_AREAS = NEIGHBORHOODS.map((name) => ({
   name,
-  deliveryPrices: { "5g": 100, tbsher: 200, "fast-delivery": 300 }
+  deliveryPrices: { "5g": 100, tbsher: 200, "fast-delivery": FAST_DELIVERY_PRICES[name] ?? 300 }
 }));
 const PHONE_LENGTH = 10;
 const THEME_STORAGE_KEY = "sahseh-menu-theme";

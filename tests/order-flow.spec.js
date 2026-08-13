@@ -54,9 +54,11 @@ test("desktop renders the ordering menu, aligns hash sections, toggles cart, kee
   const streetInput = page.locator('textarea[name="streetAddress"]');
   await expect(page.locator('input[name="neighborhoodSearch"]')).toHaveCount(0);
   await neighborhoodSelect.click();
-  await expect(page.locator(".neighborhood-option")).toHaveCount(21);
+  await expect(page.locator(".neighborhood-option")).toHaveCount(26);
   const neighborhoodOptions = (await page.locator(".neighborhood-option").allTextContents()).map((text) => text.trim());
   expect(neighborhoodOptions).toEqual([...neighborhoodOptions].sort((first, second) => first.localeCompare(second, "ar-SY")));
+  expect(neighborhoodOptions).toContain("السكن الجامعي");
+  expect(neighborhoodOptions).toContain("اوراس");
   await typeNeighborhoodFilter(neighborhoodSelect, "عر");
   await expect(page.locator(".neighborhood-option")).toHaveText("وعر");
   await page.locator(".neighborhood-option", { hasText: "وعر" }).click();
@@ -144,7 +146,7 @@ test("mobile handles validation, delivery address, add to cart, and checkout con
   await expect(page.locator(".neighborhood-option")).toHaveText("وعر");
   await page.locator(".neighborhood-option", { hasText: "وعر" }).click();
   await page.locator('input[name="deliveryCompany"][value="fast-delivery"]').check();
-  await expect(page.locator(".checkout-final")).toContainText("400");
+  await expect(page.locator(".checkout-final")).toContainText("390");
   await expect(page.locator(".checkout-submit")).toHaveText("تأكيد الطلب");
   await page.locator('textarea[name="notes"]').fill("Floor 2 #5, near door @ 9pm");
   await page.locator(".checkout-submit").click();
@@ -160,7 +162,7 @@ test("mobile handles validation, delivery address, add to cart, and checkout con
   const popupPromise = page.waitForEvent("popup");
   await page.locator(".order-review-actions button", { hasText: "تأكيد" }).click();
   const whatsappPopup = await popupPromise;
-  await expect(whatsappPopup).toHaveURL(/(?:wa\.me\/963930944255|api\.whatsapp\.com\/send)/);
+  await expect(whatsappPopup).toHaveURL(/(?:wa\.me\/963958515311|api\.whatsapp\.com\/send)/);
   await expect(page.locator(".order-success-modal")).toBeVisible();
   await expect(page.locator(".order-success-panel")).toContainText("تم تأكيد الطلب");
   await expect(page.locator(".order-success-panel button")).toHaveCount(2);
@@ -178,7 +180,7 @@ test("mobile handles validation, delivery address, add to cart, and checkout con
   const secondPopupPromise = page.waitForEvent("popup");
   await page.locator(".order-review-actions button", { hasText: "تأكيد" }).click();
   const secondWhatsappPopup = await secondPopupPromise;
-  await expect(secondWhatsappPopup).toHaveURL(/(?:wa\.me\/963930944255|api\.whatsapp\.com\/send)/);
+  await expect(secondWhatsappPopup).toHaveURL(/(?:wa\.me\/963958515311|api\.whatsapp\.com\/send)/);
   await expect(page.locator(".order-success-modal")).toBeVisible();
   await page.locator(".order-success-panel button", { hasText: "طلب جديد" }).click();
   await expect(page.locator(".order-success-modal")).toHaveCount(0);
