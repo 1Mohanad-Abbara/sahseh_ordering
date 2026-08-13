@@ -629,14 +629,12 @@ function CartPanel({
   form,
   formErrors,
   isSubmitting,
-  submittedOrder,
   onClose,
   onIncrease,
   onDecrease,
   onRemove,
   onFormChange,
-  onSubmit,
-  onNewOrder
+  onSubmit
 }) {
   const empty = items.length === 0;
 
@@ -652,52 +650,39 @@ function CartPanel({
         </IconButton>
       </div>
 
-      {submittedOrder ? (
-        <section className="order-confirmation">
-          <p>تم تجهيز الطلب</p>
-          <strong>{submittedOrder}</strong>
-          <span>تم فتح محادثة واتساب بالطلب. اضغط إرسال لإتمام الطلب.</span>
-          <button className="primary-button" type="button" onClick={onNewOrder}>
-            طلب جديد
-          </button>
-        </section>
+      {empty ? (
+        <div className="empty-cart">
+          <strong>السلة فارغة</strong>
+          <span>اختر المنتجات من المنيو لإكمال الطلب.</span>
+        </div>
       ) : (
-        <>
-          {empty ? (
-            <div className="empty-cart">
-              <strong>السلة فارغة</strong>
-              <span>اختر المنتجات من المنيو لإكمال الطلب.</span>
-            </div>
-          ) : (
-            <ul className="cart-lines">
-              {items.map((item) => (
-                <CartLine
-                  key={item.product.id}
-                  item={item}
-                  onIncrease={() => onIncrease(item.product.id)}
-                  onDecrease={() => onDecrease(item.product.id)}
-                  onRemove={() => onRemove(item.product.id)}
-                />
-              ))}
-            </ul>
-          )}
-
-          <div className="cart-total">
-            <span>مجموع المنتجات</span>
-            <strong>{formatTotal(total)}</strong>
-          </div>
-
-          <CheckoutForm
-            form={form}
-            formErrors={formErrors}
-            isSubmitting={isSubmitting}
-            onChange={onFormChange}
-            onSubmit={onSubmit}
-            disabled={empty}
-            finalTotal={finalTotal}
-          />
-        </>
+        <ul className="cart-lines">
+          {items.map((item) => (
+            <CartLine
+              key={item.product.id}
+              item={item}
+              onIncrease={() => onIncrease(item.product.id)}
+              onDecrease={() => onDecrease(item.product.id)}
+              onRemove={() => onRemove(item.product.id)}
+            />
+          ))}
+        </ul>
       )}
+
+      <div className="cart-total">
+        <span>مجموع المنتجات</span>
+        <strong>{formatTotal(total)}</strong>
+      </div>
+
+      <CheckoutForm
+        form={form}
+        formErrors={formErrors}
+        isSubmitting={isSubmitting}
+        onChange={onFormChange}
+        onSubmit={onSubmit}
+        disabled={empty}
+        finalTotal={finalTotal}
+      />
     </aside>
   );
 }
@@ -784,7 +769,7 @@ export default function OrderingApp() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submittedOrder, setSubmittedOrder] = useState("");
+  const [orderConfirmed, setOrderConfirmed] = useState(false);
   const [pendingOrder, setPendingOrder] = useState(null);
   const [backToTopVisible, setBackToTopVisible] = useState(false);
   const [footerVisible, setFooterVisible] = useState(false);
@@ -827,14 +812,14 @@ export default function OrderingApp() {
       }
     }
 
-    document.body.classList.toggle("modal-open", Boolean(activeProductId || pendingOrder || submittedOrder));
+    document.body.classList.toggle("modal-open", Boolean(activeProductId || pendingOrder || orderConfirmed));
     document.addEventListener("keydown", handleKeyDown);
 
     return () => {
       document.body.classList.remove("modal-open");
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [activeProductId, pendingOrder, submittedOrder]);
+  }, [activeProductId, pendingOrder, orderConfirmed]);
 
   useEffect(() => {
     function syncCartScrollLock() {
@@ -933,7 +918,7 @@ export default function OrderingApp() {
   }, [categories.length]);
 
   function setProductQuantity(productId, nextQuantity) {
-    setSubmittedOrder("");
+    setOrderConfirmed(false);
     setCart((current) => {
       const product = menuData?.productsById?.[productId];
       if (!product || product.available === false) return current;
@@ -1018,22 +1003,21 @@ export default function OrderingApp() {
     setFormErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
-    const confirmationNumber = `SS-${Date.now().toString().slice(-6)}`;
     const message = buildWhatsAppOrderMessage(form, cartItems, finalTotal);
-    setPendingOrder({ confirmationNumber, message, deliveryCompany: form.deliveryCompany });
+    setPendingOrder({ message, deliveryCompany: form.deliveryCompany });
   }
 
   function handleConfirmOrder() {
     if (!pendingOrder) return;
 
     openWhatsAppOrder(pendingOrder.message, pendingOrder.deliveryCompany);
-    setSubmittedOrder(pendingOrder.confirmationNumber);
+    setOrderConfirmed(true);
     setPendingOrder(null);
     setCart({});
   }
 
   function handleNewOrder() {
-    setSubmittedOrder("");
+    setOrderConfirmed(false);
     setPendingOrder(null);
     setForm(EMPTY_FORM);
     setFormErrors({});
@@ -1101,14 +1085,12 @@ export default function OrderingApp() {
             form={form}
             formErrors={formErrors}
             isSubmitting={isSubmitting}
-            submittedOrder={submittedOrder}
             onClose={() => setCartOpen(false)}
             onIncrease={increaseProduct}
             onDecrease={decreaseProduct}
             onRemove={removeProduct}
             onFormChange={handleFormChange}
             onSubmit={handleSubmit}
-            onNewOrder={handleNewOrder}
           />
         </div>
       </main>
@@ -1134,7 +1116,7 @@ export default function OrderingApp() {
       {cartOpen ? <button className="cart-backdrop" type="button" aria-label="إغلاق السلة" onClick={() => setCartOpen(false)} /> : null}
 
       <OrderReviewModal order={pendingOrder} onBack={() => setPendingOrder(null)} onConfirm={handleConfirmOrder} />
-      <OrderSuccessModal open={Boolean(submittedOrder)} onNewOrder={handleNewOrder} />
+      <OrderSuccessModal open={orderConfirmed} onNewOrder={handleNewOrder} />
 
       <ProductModal
         product={activeProduct}

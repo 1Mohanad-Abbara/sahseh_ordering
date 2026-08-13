@@ -12,7 +12,6 @@
   --accent-line-strong: rgba(237, 28, 35, 0.56);
   --line: rgba(255, 247, 238, 0.1);
   --soft-red: rgba(237, 28, 35, 0.12);
-  --success: #4ddf9a;
 }
 
 * {
@@ -192,7 +191,6 @@ h1 {
   --accent-line-strong: rgba(237, 31, 39, 0.45);
   --line: rgba(33, 24, 23, 0.12);
   --soft-red: #fff8f8;
-  --success: #176843;
 }
 
 :root[data-theme="light"] body {
@@ -1360,8 +1358,7 @@ button:disabled {
   height: 2.3rem;
 }
 
-.empty-cart,
-.order-confirmation {
+.empty-cart {
   display: grid;
   gap: 0.5rem;
   padding: 1rem;
@@ -1371,24 +1368,16 @@ button:disabled {
   text-align: center;
 }
 
-.empty-cart strong,
-.order-confirmation p {
+.empty-cart strong {
   margin: 0;
   color: var(--brand-red-dark);
   font-weight: 900;
 }
 
-.empty-cart span,
-.order-confirmation span {
+.empty-cart span {
   color: var(--muted);
   font-weight: 800;
   line-height: 1.45;
-}
-
-.order-confirmation strong {
-  color: var(--success);
-  font-size: 1.7rem;
-  direction: ltr;
 }
 
 .cart-lines {

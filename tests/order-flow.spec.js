@@ -161,6 +161,7 @@ test("mobile handles validation, delivery address, add to cart, and checkout con
   await expect(whatsappPopup).toHaveURL(/(?:wa\.me\/963930944255|api\.whatsapp\.com\/send)/);
   await expect(page.locator(".order-success-modal")).toBeVisible();
   await expect(page.locator(".order-success-panel")).toContainText("تم تأكيد الطلب");
+  await expect(page.locator(".order-confirmation")).toHaveCount(0);
   await page.locator(".order-success-panel button", { hasText: "طلب جديد" }).click();
   await expect(page.locator(".order-success-modal")).toHaveCount(0);
 });
