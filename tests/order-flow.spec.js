@@ -167,7 +167,7 @@ test("mobile handles validation, delivery address, add to cart, and checkout con
   await expect(page.locator(".order-success-panel")).toContainText("تم تأكيد الطلب");
   await expect(page.locator(".order-success-panel button")).toHaveCount(2);
   await expect(page.locator(".order-confirmation")).toHaveCount(0);
-  await page.locator(".order-success-panel button", { hasText: "العودة" }).click();
+  await page.locator(".order-success-panel button", { hasText: "عودة" }).click();
   await expect(page.locator(".order-success-modal")).toHaveCount(0);
   await expect(page.locator(".floating-cart")).toHaveClass(/is-visible/);
 

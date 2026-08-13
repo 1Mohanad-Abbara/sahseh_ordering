@@ -746,7 +746,7 @@ function OrderSuccessModal({ open, onBack, onNewOrder }) {
       <section className="order-success-panel">
         <h2 id="order-success-title">تم تأكيد الطلب ✅</h2>
         <div className="order-review-actions">
-          <button className="secondary-button" type="button" onClick={onBack}>العودة</button>
+          <button className="secondary-button" type="button" onClick={onBack}>عودة</button>
           <button className="primary-button" type="button" onClick={onNewOrder}>طلب جديد</button>
         </div>
       </section>
