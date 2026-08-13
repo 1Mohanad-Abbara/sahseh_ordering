@@ -705,7 +705,7 @@ function OrderReviewModal({ order, onBack, onConfirm }) {
   );
 }
 
-function OrderSuccessModal({ open, onNewOrder }) {
+function OrderSuccessModal({ open, onBack, onNewOrder }) {
   if (!open) return null;
 
   return (
@@ -713,7 +713,10 @@ function OrderSuccessModal({ open, onNewOrder }) {
       <div className="order-success-backdrop" aria-hidden="true" />
       <section className="order-success-panel">
         <h2 id="order-success-title">تم تأكيد الطلب</h2>
-        <button className="primary-button" type="button" onClick={onNewOrder}>طلب جديد</button>
+        <div className="order-review-actions">
+          <button className="secondary-button" type="button" onClick={onBack}>العودة</button>
+          <button className="primary-button" type="button" onClick={onNewOrder}>طلب جديد</button>
+        </div>
       </section>
     </div>
   );
@@ -1013,13 +1016,20 @@ export default function OrderingApp() {
     openWhatsAppOrder(pendingOrder.message, pendingOrder.deliveryCompany);
     setOrderConfirmed(true);
     setPendingOrder(null);
-    setCart({});
+  }
+
+  function handleReturnToMenu() {
+    setOrderConfirmed(false);
+    setPendingOrder(null);
+    setCartOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function handleNewOrder() {
     setOrderConfirmed(false);
     setPendingOrder(null);
     setForm(EMPTY_FORM);
+    setCart({});
     setFormErrors({});
     setCartOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1116,7 +1126,7 @@ export default function OrderingApp() {
       {cartOpen ? <button className="cart-backdrop" type="button" aria-label="إغلاق السلة" onClick={() => setCartOpen(false)} /> : null}
 
       <OrderReviewModal order={pendingOrder} onBack={() => setPendingOrder(null)} onConfirm={handleConfirmOrder} />
-      <OrderSuccessModal open={orderConfirmed} onNewOrder={handleNewOrder} />
+      <OrderSuccessModal open={orderConfirmed} onBack={handleReturnToMenu} onNewOrder={handleNewOrder} />
 
       <ProductModal
         product={activeProduct}
