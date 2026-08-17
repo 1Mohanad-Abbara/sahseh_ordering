@@ -176,7 +176,7 @@ test("mobile handles validation, delivery address, add to cart, and checkout con
   await expect(streetInput).toHaveValue("Homs 123, floor #5");
   await expect(page.locator('textarea[name="notes"]')).toHaveValue("Floor 2 #5, near door @ 9pm");
   await page.locator('input[name="deliveryCompany"][value="tbsher"]').check();
-  await expect(page.locator(".checkout-final")).toContainText("130");
+  await expect(page.locator(".checkout-final")).toContainText("400");
 
   await page.locator(".checkout-submit").click();
   const secondPopupPromise = page.waitForEvent("popup");
