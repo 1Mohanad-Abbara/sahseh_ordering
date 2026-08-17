@@ -175,12 +175,14 @@ test("mobile handles validation, delivery address, add to cart, and checkout con
   await expect(page.locator(".cart-panel")).toContainText("شاي");
   await expect(streetInput).toHaveValue("Homs 123, floor #5");
   await expect(page.locator('textarea[name="notes"]')).toHaveValue("Floor 2 #5, near door @ 9pm");
+  await page.locator('input[name="deliveryCompany"][value="tbsher"]').check();
+  await expect(page.locator(".checkout-final")).toContainText("130");
 
   await page.locator(".checkout-submit").click();
   const secondPopupPromise = page.waitForEvent("popup");
   await page.locator(".order-review-actions button", { hasText: "تأكيد" }).click();
   const secondWhatsappPopup = await secondPopupPromise;
-  await expect(secondWhatsappPopup).toHaveURL(/(?:wa\.me\/963958515311|api\.whatsapp\.com\/send)/);
+  await expect(secondWhatsappPopup).toHaveURL(/(?:wa\.me\/963940655967|api\.whatsapp\.com\/send)/);
   await expect(page.locator(".order-success-modal")).toBeVisible();
   await page.locator(".order-success-panel button", { hasText: "طلب جديد" }).click();
   await expect(page.locator(".order-success-modal")).toHaveCount(0);

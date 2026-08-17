@@ -2,7 +2,7 @@
 
 Customer ordering frontend for Sahseh. This app is separate from the static QR menu in `../sahseh_menu`, but the shared visual shell must stay matched to it.
 
-Last reviewed against `index.html`, `src/OrderingApp.jsx`, `src/styles.css`, `public/data/menu.json`, and shared assets on 2026-08-11.
+Last reviewed against `index.html`, `src/OrderingApp.jsx`, `src/styles.css`, `public/data/menu.json`, and shared assets on 2026-08-17.
 
 ## Role
 
@@ -62,16 +62,16 @@ As of this review, shared menu data, brand images, background pattern, icons, an
 7. Product row add buttons show only a centered `+` sign when quantity is 0; after adding, the row switches to the `- quantity +` stepper. Product quantities are clamped from 0 to 99.
 8. The cart can open from the header cart button or compact mobile floating cart. Desktop uses a fixed cart panel; mobile uses a bottom sheet with backdrop and locks background scrolling while open. The mobile floating cart hides while the footer is visible so footer actions stay reachable.
 9. Checkout fields are name, phone, required neighborhood select, required `الموقع بالتحديد` text, required delivery service, optional notes, and a final-price row after notes. Phone input is numeric and must match `09XXXXXXXX`. Name accepts letters/spaces only.
-10. After valid checkout, a final review popup shows the same order information and `السعر المقدر متضمن التوصيل`. `عودة` preserves the cart and form; `تأكيد` opens the selected company WhatsApp chat with the order prepared, then clears the cart and shows `تم تأكيد الطلب` with a `طلب جديد` button. The customer must press WhatsApp Send manually.
+10. After valid checkout, a final review popup shows the same order information and `السعر المقدر متضمن التوصيل`. `عودة` in the review popup preserves the cart and form. `تأكيد` opens the selected company WhatsApp chat with the order prepared, then shows `تم تأكيد الطلب` with `عودة` and `طلب جديد` buttons. `عودة` closes the success popup and returns to the menu while preserving the cart and checkout fields; `طلب جديد` clears the cart/form and returns to the top of the menu. The customer must press WhatsApp Send manually.
 11. Back-to-top appears after scrolling past 240px and hides while the footer is visible.
 
 ## Checkout Delivery Fields
 
 - Neighborhood selection is required and sorted with Arabic locale ordering. It is shown as a select-style list with no visible search field; typing while the list is focused filters by any substring. For example, typing `عر` should show `وعر`.
-- Current neighborhoods are: ادخار، الحميدية، الملعب، انشاءات، باب سباع، بابا عمرو، بياضة، جورة الشياح، حضارة، حمرا، خالدية، دبلان، شبابية، غوطة، قرابيص، قصور، كرم الشامي، كرم اللوز، ميدان، وادي الذهب، وعر.
+- Current neighborhoods are: ادخار، الحميدية، السكن الجامعي، المحطة، الملعب، انشاءات، اوراس، باب سباع، بابا عمرو، بياضة، جورة الشياح، حضارة، حمرا، خالدية، خضر، دبلان، شبابية، غوطة، قرابيص، قصور، كرم الشامي، كرم اللوز، مشفى الجامعة، ميدان، وادي الذهب، وعر.
 - Street/nearest-landmark text is required and is labeled `الموقع بالتحديد`.
 - Delivery service selection is required, labeled `خدمة التوصيل`, and must be exactly one of `5G`, `Tbsher - تبشر`, or `Fast Delivery`.
-- Delivery pricing is represented by a neighborhood-by-company matrix in `src/OrderingApp.jsx`. Every neighborhood has a separate slot for each delivery company. Each company also has its own `whatsappNumber` field; the three values currently share the same placeholder number until the real numbers are provided. Temporary values are currently `100`, `200`, and `300` per company slot and can be replaced with the real pair-specific prices later.
+- Delivery pricing is represented by a neighborhood-by-company matrix in `src/OrderingApp.jsx`. Every neighborhood has a separate slot for each delivery company. Each company also has its own `whatsappNumber` field. `5G` still uses placeholder delivery fee `100` and placeholder WhatsApp number `963930944255`. `Tbsher - تبشر` uses WhatsApp number `963940655967` (local `0940655967`) and prices, in sorted-neighborhood order: `25`, `16`, `25`, `15`, `15`, `15`, `75`, `20`, `20`, `30`, `15`, `20`, `15`, `18`, `18`, `12`, `30`, `15`, `16`, `18`, `18`, `25`, `18`, `15`, `25`, `30`. `Fast Delivery` uses WhatsApp number `963958515311` (local `0958515311`) and real prices where provided: `290` for ادخار، بابا عمرو، وعر، شبابية، بياضة، وادي الذهب، كرم اللوز، خالدية، السكن الجامعي; `230` for غوطة، حمرا، دبلان، جورة الشياح، انشاءات، قرابيص، الحميدية، الملعب، قصور; `200` for ميدان، حضارة، كرم الشامي، خضر، المحطة; `210` for مشفى الجامعة; `650` for اوراس. باب سباع currently keeps the fallback Fast Delivery fee `300` until its real price is supplied.
 - `src/OrderingApp.jsx` keeps a delivery area data structure with a per-company `deliveryPrices` slot for every neighborhood, so future pricing can differ by neighborhood and company.
 - The final price row appears after notes and shows only the combined product subtotal plus selected delivery service fee. Delivery fees are used in the calculation but are not shown beside company names.
 
@@ -162,11 +162,11 @@ For shared data/assets, also run the source validation script from `../sahseh_so
 
 - This is a React 19 and Vite frontend. The active implementation is in `src/OrderingApp.jsx`; styling is in `src/styles.css`; the entrypoint is `src/main.jsx`.
 - Shared menu data and visual assets are deploy copies from `../sahseh_source`. Preserve the shared visual parity with `../sahseh_menu` and do not replace this app with the static site.
-- Checkout currently supports 21 sorted neighborhoods, substring filtering while the select list is focused, the required `الموقع بالتحديد` field with its existing placeholder, and exactly one delivery company.
-- Delivery pricing is stored in a neighborhood-by-company matrix. Current temporary values are integer placeholders `100`, `200`, and `300`; they are internal calculation values and are never shown beside company names.
-- Each delivery company has its own `whatsappNumber` field. All three currently use the same international placeholder number `963930944255` until real company numbers are supplied.
-- The submit flow validates the form, opens a review popup, preserves cart/form state on `عودة`, and opens the selected company WhatsApp chat only after `تأكيد`. After that, the cart is cleared and a `تم تأكيد الطلب` popup offers `طلب جديد`, which resets the form and returns to the top of the menu.
-- WhatsApp message sections are separated by one blank line. The `الطلبات:` section is immediately followed by products, with each product on its own consecutive line using `اسم المنتج عدد X = السعر`. The final line is `السعر المقدر متضمن التوصيل`.
+- Checkout currently supports 26 sorted neighborhoods, substring filtering while the select list is focused, the required `الموقع بالتحديد` field with its existing placeholder, and exactly one delivery company.
+- Delivery pricing is stored in a neighborhood-by-company matrix. `5G` still uses placeholder value `100`; `Tbsher - تبشر` and `Fast Delivery` use provided neighborhood-specific prices, with باب سباع still falling back to `300` for Fast Delivery until its real price is supplied. Delivery fees are internal calculation values and are never shown beside company names.
+- Each delivery company has its own `whatsappNumber` field. `Tbsher - تبشر` uses `963940655967` (local `0940655967`); `Fast Delivery` uses `963958515311` (local `0958515311`); `5G` still uses the placeholder number `963930944255`.
+- The submit flow validates the form, opens a review popup, preserves cart/form state on review `عودة`, and opens the selected company WhatsApp chat only after `تأكيد`. After confirmation, a `تم تأكيد الطلب` popup offers `عودة`, which preserves the same cart/form and returns to the menu, and `طلب جديد`, which resets the form/cart and returns to the top of the menu.
+- WhatsApp message sections are separated by one blank line and use restrained formal emojis for the title and customer/delivery fields. The `الطلبات:` section is immediately followed by products, with each product on its own consecutive line using `اسم المنتج عدد X = السعر`. The final line is `السعر المقدر متضمن التوصيل`.
 - Preserve mobile background scroll locking while cart or modal overlays are open, desktop/light/dark hover behavior, equal review-popup button sizing, and the existing product/cart accessibility behavior.
-- Current smoke expectations are 13 categories, 13 sections, 104 products, 21 neighborhoods, delivery selection, review/back/confirm flow, WhatsApp popup opening, success popup, and new-order reset.
+- Current smoke expectations are 13 categories, 13 sections, 104 products, 26 neighborhoods, delivery selection, Tbsher and Fast Delivery pricing/WhatsApp routing, review/back/confirm flow, WhatsApp popup opening, success-popup return, and new-order reset.
 - There is no backend, database, restaurant dashboard, or automatic WhatsApp send. The customer must press WhatsApp Send manually.

@@ -6,7 +6,9 @@ Sahseh Ordering is the customer-facing Arabic RTL ordering frontend for Sahseh. 
 
 The React app loads menu data from `public/data/menu.json`, lets customers add products to a cart, collects checkout information, and calculates the final price including the selected delivery service. The customer reviews the order, confirms it, and WhatsApp opens with the order prepared. The customer must press WhatsApp Send manually.
 
-After confirmation, the cart is cleared and a success popup offers `طلب جديد`, which returns the customer to the top of the menu.
+After confirmation, a success popup offers `عودة`, which returns to the menu while preserving the same cart and checkout fields, and `طلب جديد`, which clears the cart/form and returns the customer to the top of the menu.
+
+Delivery options use a neighborhood-by-company pricing matrix. `Tbsher - تبشر` currently uses phone `0940655967` with its provided neighborhood prices. `Fast Delivery` uses phone `0958515311` with its provided neighborhood prices, while `5G` still uses placeholder phone and fee values until its real data is supplied.
 
 ## Main Files
 
