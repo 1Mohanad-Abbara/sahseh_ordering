@@ -8,7 +8,7 @@ The React app loads menu data from `public/data/menu.json`, lets customers add p
 
 After confirmation, a success popup offers `عودة`, which returns to the menu while preserving the same cart and checkout fields, and `طلب جديد`, which clears the cart/form and returns the customer to the top of the menu.
 
-Delivery options use a neighborhood-by-company pricing matrix. `Tbsher - تبشر` currently uses phone `0940655967` with its provided neighborhood prices. `Fast Delivery` uses phone `0958515311` with its provided neighborhood prices, while `5G` still uses placeholder phone and fee values until its real data is supplied.
+Delivery options use a neighborhood-by-company pricing matrix. `Tbsher - تبشر` currently uses phone `0940655967` with its provided neighborhood prices. `Fast Delivery` uses phone `0958515311` with its provided neighborhood prices, while `5G` still uses placeholder phone and fee values until its real data is supplied. Known service availability is shown only in the final review message.
 
 ## Main Files
 

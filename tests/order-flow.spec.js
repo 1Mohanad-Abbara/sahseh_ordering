@@ -153,6 +153,7 @@ test("mobile handles validation, delivery address, add to cart, and checkout con
   await expect(page.locator(".order-review-modal")).toBeVisible();
   await expect(page.locator(".order-review-message")).toContainText("🧾 طلب جديد من صَح صِح");
   await expect(page.locator(".order-review-message")).toContainText("🚚 خدمة التوصيل");
+  await expect(page.locator(".order-review-message")).toContainText("🕒 وقت توفر الخدمة: 24 ساعة");
   await expect(page.locator(".order-review-message")).toContainText("السعر المقدر متضمن التوصيل");
   await page.locator(".order-review-actions button", { hasText: "عودة" }).click();
   await expect(page.locator(".order-review-modal")).toHaveCount(0);
@@ -176,9 +177,11 @@ test("mobile handles validation, delivery address, add to cart, and checkout con
   await expect(streetInput).toHaveValue("Homs 123, floor #5");
   await expect(page.locator('textarea[name="notes"]')).toHaveValue("Floor 2 #5, near door @ 9pm");
   await page.locator('input[name="deliveryCompany"][value="tbsher"]').check();
+  await expect(page.locator(".delivery-options")).not.toContainText("10:00 AM");
   await expect(page.locator(".checkout-final")).toContainText("400");
 
   await page.locator(".checkout-submit").click();
+  await expect(page.locator(".order-review-message")).toContainText("🕒 وقت توفر الخدمة: 10:00 AM - 12:00 PM");
   const secondPopupPromise = page.waitForEvent("popup");
   await page.locator(".order-review-actions button", { hasText: "تأكيد" }).click();
   const secondWhatsappPopup = await secondPopupPromise;

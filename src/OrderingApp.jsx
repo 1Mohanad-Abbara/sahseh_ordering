@@ -18,6 +18,10 @@ const DELIVERY_COMPANIES = [
   { id: "tbsher", name: "Tbsher - تبشر", whatsappNumber: "963940655967" },
   { id: "fast-delivery", name: "Fast Delivery", whatsappNumber: "963958515311" }
 ];
+const DELIVERY_SERVICE_AVAILABILITY = {
+  tbsher: "10:00 AM - 12:00 PM",
+  "fast-delivery": "24 ساعة"
+};
 const FAST_DELIVERY_PRICES = {
   "ادخار": 290,
   "بابا عمرو": 290,
@@ -190,18 +194,24 @@ function deliveryCompanyName(value) {
   return DELIVERY_COMPANIES.find((company) => company.id === value)?.name || value;
 }
 
-function buildWhatsAppOrderMessage(form, cartItems, finalTotal) {
+function deliveryAvailability(value) {
+  return DELIVERY_SERVICE_AVAILABILITY[value] || "";
+}
+
+function buildOrderMessage(form, cartItems, finalTotal, { includeAvailability = false } = {}) {
   const items = cartItems.map(({ product, quantity }) =>
     `${product.name} عدد ${quantity} = ${formatTotal(productPrice(product) * quantity)}`
   ).join("\n");
+  const serviceAvailability = includeAvailability ? deliveryAvailability(form.deliveryCompany) : "";
 
   const customerSection = [
     `👤 الاسم: ${form.name}`,
     `📞 رقم الهاتف: ${form.phone}`,
     `📍 المنطقة: ${form.neighborhood}`,
     `🏠 الموقع بالتحديد: ${form.streetAddress}`,
-    `🚚 خدمة التوصيل: ${deliveryCompanyName(form.deliveryCompany)}`
-  ].join("\n");
+    `🚚 خدمة التوصيل: ${deliveryCompanyName(form.deliveryCompany)}`,
+    serviceAvailability ? `🕒 وقت توفر الخدمة: ${serviceAvailability}` : ""
+  ].filter(Boolean).join("\n");
 
   const totalSection = [
     `${ESTIMATED_TOTAL_LABEL}: ${formatTotal(finalTotal)}`,
@@ -214,6 +224,14 @@ function buildWhatsAppOrderMessage(form, cartItems, finalTotal) {
     ["الطلبات:", items].join("\n"),
     totalSection
   ].join("\n\n");
+}
+
+function buildWhatsAppOrderMessage(form, cartItems, finalTotal) {
+  return buildOrderMessage(form, cartItems, finalTotal);
+}
+
+function buildOrderReviewMessage(form, cartItems, finalTotal) {
+  return buildOrderMessage(form, cartItems, finalTotal, { includeAvailability: true });
 }
 
 function openWhatsAppOrder(message, deliveryCompany) {
@@ -755,7 +773,7 @@ function OrderReviewModal({ order, onBack, onConfirm }) {
       <button className="order-review-backdrop" type="button" aria-label="عودة" onClick={onBack} />
       <section className="order-review-panel">
         <h2 id="order-review-title">معلومات الطلب</h2>
-        <pre className="order-review-message">{order.message}</pre>
+        <pre className="order-review-message">{order.reviewMessage || order.message}</pre>
         <div className="order-review-actions">
           <button className="secondary-button" type="button" onClick={onBack}>عودة</button>
           <button className="primary-button" type="button" onClick={onConfirm}>تأكيد</button>
@@ -1067,7 +1085,8 @@ export default function OrderingApp() {
     if (Object.keys(errors).length > 0) return;
 
     const message = buildWhatsAppOrderMessage(form, cartItems, finalTotal);
-    setPendingOrder({ message, deliveryCompany: form.deliveryCompany });
+    const reviewMessage = buildOrderReviewMessage(form, cartItems, finalTotal);
+    setPendingOrder({ message, reviewMessage, deliveryCompany: form.deliveryCompany });
   }
 
   function handleConfirmOrder() {
