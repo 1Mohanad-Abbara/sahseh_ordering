@@ -14,13 +14,42 @@ const EMPTY_FORM = {
   notes: ""
 };
 const DELIVERY_COMPANIES = [
-  { id: "5g", name: "5G", whatsappNumber: "963930944255" },
+  { id: "5g", name: "5G", whatsappNumber: "963967355999" },
   { id: "tbsher", name: "Tbsher - تبشر", whatsappNumber: "963940655967" },
   { id: "fast-delivery", name: "Fast Delivery", whatsappNumber: "963958515311" }
 ];
 const DELIVERY_SERVICE_AVAILABILITY = {
+  "5g": "9:30 AM - 12:30 AM",
   tbsher: "10:00 AM - 12:00 PM",
   "fast-delivery": "24 ساعة"
+};
+const FIVE_G_DELIVERY_PRICES = {
+  "ادخار": 260,
+  "الحميدية": 160,
+  "السكن الجامعي": 260,
+  "المحطة": 160,
+  "الملعب": 160,
+  "انشاءات": 160,
+  "اوراس": 1500,
+  "باب سباع": 210,
+  "بابا عمرو": 210,
+  "بياضة": 350,
+  "جورة الشياح": 210,
+  "حضارة": 210,
+  "حمرا": 160,
+  "خالدية": 260,
+  "خضر": 210,
+  "دبلان": 160,
+  "شبابية": 260,
+  "غوطة": 160,
+  "قرابيص": 260,
+  "قصور": 260,
+  "كرم الشامي": 160,
+  "كرم اللوز": 260,
+  "مشفى الجامعة": 160,
+  "ميدان": 160,
+  "وادي الذهب": 260,
+  "وعر": 260
 };
 const FAST_DELIVERY_PRICES = {
   "ادخار": 290,
@@ -107,7 +136,7 @@ const NEIGHBORHOODS = [
 ].sort((first, second) => first.localeCompare(second, "ar-SY"));
 const DELIVERY_AREAS = NEIGHBORHOODS.map((name) => ({
   name,
-  deliveryPrices: { "5g": 100, tbsher: TBSHER_DELIVERY_PRICES[name] ?? 200, "fast-delivery": FAST_DELIVERY_PRICES[name] ?? 300 }
+  deliveryPrices: { "5g": FIVE_G_DELIVERY_PRICES[name] ?? 100, tbsher: TBSHER_DELIVERY_PRICES[name] ?? 200, "fast-delivery": FAST_DELIVERY_PRICES[name] ?? 300 }
 }));
 const PHONE_LENGTH = 10;
 const THEME_STORAGE_KEY = "sahseh-menu-theme";
@@ -235,7 +264,7 @@ function buildOrderReviewMessage(form, cartItems, finalTotal) {
 }
 
 function openWhatsAppOrder(message, deliveryCompany) {
-  const phone = DELIVERY_COMPANIES.find((company) => company.id === deliveryCompany)?.whatsappNumber || "963930944255";
+  const phone = DELIVERY_COMPANIES.find((company) => company.id === deliveryCompany)?.whatsappNumber || "963967355999";
   const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
   const link = document.createElement("a");
   link.href = url;
