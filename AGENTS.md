@@ -55,7 +55,7 @@ As of this review, shared menu data, brand images, background pattern, icons, an
 
 1. `OrderingApp` loads `public/data/menu.json` through `assetUrl("data/menu.json")`, respecting Vite `BASE_URL`.
 2. Menu categories and products are sorted by `order` and filtered when `visibleInOrdering === false`.
-3. The app renders 13 category controls, 13 menu sections, and 104 products from the current data.
+3. The app renders 13 category controls, 13 menu sections, and 105 products from the current data.
 4. Category navigation uses `<button>` elements, not hash links. Clicking a category scrolls to the section without adding `#section-XX` to the URL.
 5. If the page is opened with an old `#section-XX` hash, the app scrolls to that section once and then clears the section hash from the URL.
 6. Product rows open the product modal when the product name/price area is clicked. The modal title shows only the product name, not the section title.
@@ -115,8 +115,8 @@ Current product images and ingredients are not populated. The modal uses the fal
 ## Current Counts
 
 - 13 categories.
-- 104 products.
-- 104 prices.
+- 105 products.
+- 105 prices.
 - 0 populated product images.
 - 0 populated product ingredient descriptions.
 - No empty price slots.
@@ -146,7 +146,7 @@ Current Playwright expectations include:
 
 - 13 category buttons.
 - 13 menu sections.
-- 104 product rows.
+- 105 product rows.
 - Category buttons scroll to sections without leaving `#section-XX` in the URL.
 - Enabled buttons have pointer cursor.
 - Desktop hover effects work for category buttons, product rows, price slots, ordering buttons, icon buttons, and footer/header controls in dark and light mode.
@@ -168,5 +168,5 @@ For shared data/assets, also run the source validation script from `../sahseh_so
 - The submit flow validates the form, opens a review popup, preserves cart/form state on review `عودة`, and opens the selected company WhatsApp chat only after `تأكيد`. After confirmation, a `تم تأكيد الطلب` popup offers `عودة`, which preserves the same cart/form and returns to the menu, and `طلب جديد`, which resets the form/cart and returns to the top of the menu.
 - WhatsApp message sections are separated by one blank line and use restrained formal emojis for the title and customer/delivery fields. The final review popup adds known service availability, but the WhatsApp text stays unchanged. The `الطلبات:` section is immediately followed by products, with each product on its own consecutive line using `اسم المنتج عدد X = السعر`. The final line is `السعر المقدر متضمن التوصيل`.
 - Preserve mobile background scroll locking while cart or modal overlays are open, desktop/light/dark hover behavior, equal review-popup button sizing, and the existing product/cart accessibility behavior.
-- Current smoke expectations are 13 categories, 13 sections, 104 products, 27 neighborhoods, delivery selection, final-review service availability, 5G/Tbsher/Fast Delivery pricing, Tbsher and Fast Delivery WhatsApp routing, review/back/confirm flow, WhatsApp popup opening, success-popup return, and new-order reset.
+- Current smoke expectations are 13 categories, 13 sections, 105 products, 27 neighborhoods, delivery selection, final-review service availability, 5G/Tbsher/Fast Delivery pricing, Tbsher and Fast Delivery WhatsApp routing, review/back/confirm flow, WhatsApp popup opening, success-popup return, and new-order reset.
 - There is no backend, database, restaurant dashboard, or automatic WhatsApp send. The customer must press WhatsApp Send manually.

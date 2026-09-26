@@ -24,7 +24,7 @@ test("desktop renders the ordering menu, aligns hash sections, toggles cart, kee
   await expect(page.locator(".section-nav button")).toHaveCount(13);
 
   await expect(page.locator(".menu-section")).toHaveCount(13);
-  await expect(page.locator(".product-list li")).toHaveCount(104);
+  await expect(page.locator(".product-list li")).toHaveCount(105);
 
   await expectSectionAligned(page, "section-06");
   await expect(page).not.toHaveURL(/#section-\d+$/);
@@ -117,7 +117,7 @@ test("desktop renders the ordering menu, aligns hash sections, toggles cart, kee
 test("mobile handles validation, delivery address, add to cart, and checkout confirmation", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
-  await expect(page.locator(".product-list li")).toHaveCount(104);
+  await expect(page.locator(".product-list li")).toHaveCount(105);
 
   await page.locator(".product-list li").first().locator(".add-button").click();
   await expect(page.locator(".floating-cart")).toBeVisible();
