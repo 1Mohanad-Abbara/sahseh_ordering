@@ -61,7 +61,7 @@ As of this review, shared menu data, brand images, background pattern, icons, an
 6. Product rows open the product modal when the product name/price area is clicked. The modal title shows only the product name, not the section title.
 7. Product row add buttons show only a centered `+` sign when quantity is 0; after adding, the row switches to the `- quantity +` stepper. Product quantities are clamped from 0 to 99.
 8. The cart can open from the header cart button or compact mobile floating cart. Desktop uses a fixed cart panel; mobile uses a bottom sheet with backdrop and locks background scrolling while open. The mobile floating cart hides while the footer is visible so footer actions stay reachable.
-9. Checkout fields are name, phone, required neighborhood select, required `الموقع بالتحديد` text, required delivery service, optional notes, and a final-price row after notes. Phone input is numeric and must match `09XXXXXXXX`. Name accepts letters/spaces only.
+9. Checkout fields are name, phone, required neighborhood select, required `الموقع بالتحديد` text, required delivery service, optional notes, and a final-price row after notes. Phone input is numeric and must match `09XXXXXXXX`. Name accepts letters/spaces only. Submitting missing or invalid information shows a sticky Arabic warning listing the fields needing attention, preserves the entered information, and scrolls/focuses the first invalid control. Individual errors are linked to their controls for accessibility; notes remain optional.
 10. After valid checkout, a final review popup shows the same order information, known delivery-service availability, and `السعر المقدر متضمن التوصيل`. `عودة` in the review popup preserves the cart and form. `تأكيد` opens the selected company WhatsApp chat with the order prepared, then shows `تم تأكيد الطلب` with `عودة` and `طلب جديد` buttons. `عودة` closes the success popup and returns to the menu while preserving the cart and checkout fields; `طلب جديد` clears the cart/form and returns to the top of the menu. The customer must press WhatsApp Send manually.
 11. Back-to-top appears after scrolling past 240px and hides while the footer is visible.
 
@@ -149,6 +149,7 @@ Current Playwright expectations include:
 - 107 product rows.
 - Category buttons scroll to sections without leaving `#section-XX` in the URL.
 - Enabled buttons have pointer cursor.
+- Incomplete checkout shows a visible Arabic warning, keeps the order review closed, and focuses the first invalid text field, neighborhood control, or delivery radio without selecting a delivery company automatically. The warning clears as fields are corrected, and checkout accepts empty notes.
 - Desktop hover effects work for category buttons, product rows, price slots, ordering buttons, icon buttons, and footer/header controls in dark and light mode.
 - Back-to-top hover keeps the same colors in light and dark mode and scales slightly on desktop hover.
 - Light-mode header cart count badge is white.

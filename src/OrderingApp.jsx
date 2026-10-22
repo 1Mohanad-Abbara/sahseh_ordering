@@ -13,6 +13,13 @@ const EMPTY_FORM = {
   deliveryCompany: "",
   notes: ""
 };
+const CHECKOUT_FIELD_LABELS = {
+  name: "الاسم",
+  phone: "رقم الهاتف",
+  neighborhood: "المنطقة",
+  streetAddress: "الموقع بالتحديد",
+  deliveryCompany: "خدمة التوصيل"
+};
 const DELIVERY_COMPANIES = [
   { id: "5g", name: "5G", whatsappNumber: "963967355999" },
   { id: "tbsher", name: "Tbsher - تبشر", whatsappNumber: "963940655967" },
@@ -535,12 +542,13 @@ function CartLine({ item, onIncrease, onDecrease, onRemove }) {
 
 function CheckoutField({ label, error, as: Control = "input", ...props }) {
   const invalidProps = error === undefined ? {} : { "aria-invalid": Boolean(error) };
+  const errorId = `checkout-${props.name}-error`;
 
   return (
     <label className="field-label">
       <span>{label}</span>
-      <Control {...invalidProps} {...props} />
-      {error ? <small>{error}</small> : null}
+      <Control {...invalidProps} aria-describedby={error ? errorId : undefined} {...props} />
+      {error ? <small id={errorId}>{error}</small> : null}
     </label>
   );
 }
@@ -631,9 +639,15 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
 
   return (
     <form className="checkout-form" onSubmit={onSubmit} noValidate>
+      {Object.keys(formErrors).length > 0 ? (
+        <p className="checkout-warning" role="alert" aria-atomic="true">
+          يرجى إكمال أو تصحيح الحقول التالية: {Object.keys(formErrors).map((name) => CHECKOUT_FIELD_LABELS[name]).join("، ")}.
+        </p>
+      ) : null}
       <CheckoutField
         label="الاسم"
         name="name"
+        required
         type="text"
         value={form.name}
         onChange={onChange}
@@ -644,6 +658,7 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
       <CheckoutField
         label="رقم الهاتف"
         name="phone"
+        required
         type="tel"
         value={form.phone}
         onChange={onChange}
@@ -664,6 +679,7 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
             aria-expanded={neighborhoodOpen}
             aria-controls="neighborhood-options"
             aria-invalid={Boolean(formErrors.neighborhood)}
+            aria-describedby={formErrors.neighborhood ? "checkout-neighborhood-error" : undefined}
           >
             <span>{form.neighborhood || "اختر المنطقة"}</span>
             <b aria-hidden="true">v</b>
@@ -690,12 +706,13 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
             </div>
           ) : null}
         </div>
-        {formErrors.neighborhood ? <small>{formErrors.neighborhood}</small> : null}
+        {formErrors.neighborhood ? <small id="checkout-neighborhood-error">{formErrors.neighborhood}</small> : null}
       </div>
       <CheckoutField
         as="textarea"
         label="الموقع بالتحديد"
         name="streetAddress"
+        required
         value={form.streetAddress}
         onChange={onChange}
         rows={3}
@@ -710,6 +727,8 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
               <input
                 type="radio"
                 name="deliveryCompany"
+                required
+                aria-describedby={formErrors.deliveryCompany ? "checkout-deliveryCompany-error" : undefined}
                 value={company.id}
                 checked={form.deliveryCompany === company.id}
                 onChange={onChange}
@@ -718,7 +737,7 @@ function CheckoutForm({ form, formErrors, isSubmitting, onChange, onSubmit, disa
             </label>
           ))}
         </div>
-        {formErrors.deliveryCompany ? <small>{formErrors.deliveryCompany}</small> : null}
+        {formErrors.deliveryCompany ? <small id="checkout-deliveryCompany-error">{formErrors.deliveryCompany}</small> : null}
       </fieldset>
       <CheckoutField as="textarea" label="ملاحظات" name="notes" value={form.notes} onChange={onChange} rows={2} placeholder="اختياري" />
       <div className="checkout-final" aria-live="polite">
@@ -1115,7 +1134,17 @@ export default function OrderingApp() {
 
     const errors = validateForm();
     setFormErrors(errors);
-    if (Object.keys(errors).length > 0) return;
+    if (Object.keys(errors).length > 0) {
+      const checkoutForm = event.currentTarget;
+      window.requestAnimationFrame(() => {
+        const firstInvalidControl = checkoutForm.querySelector(
+          'input[aria-invalid="true"], textarea[aria-invalid="true"], button[aria-invalid="true"], fieldset[aria-invalid="true"] input'
+        );
+        firstInvalidControl?.focus({ preventScroll: true });
+        firstInvalidControl?.closest(".field-label, .delivery-field")?.scrollIntoView({ block: "center", behavior: "instant" });
+      });
+      return;
+    }
 
     const message = buildWhatsAppOrderMessage(form, cartItems, finalTotal);
     const reviewMessage = buildOrderReviewMessage(form, cartItems, finalTotal);

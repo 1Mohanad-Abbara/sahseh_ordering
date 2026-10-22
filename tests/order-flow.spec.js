@@ -48,6 +48,14 @@ test("desktop renders the ordering menu, aligns hash sections, toggles cart, kee
   await expect(page.locator(".cart-panel")).toContainText("السلة فارغة");
 
   await page.locator(".product-list li").first().locator(".add-button").click();
+  const checkoutWarning = page.getByRole("alert");
+  await page.locator(".checkout-submit").click();
+  await expect(checkoutWarning).toBeInViewport();
+  await expect(checkoutWarning).toContainText("الاسم، رقم الهاتف، المنطقة، الموقع بالتحديد، خدمة التوصيل");
+  await expect(checkoutWarning).not.toContainText("ملاحظات");
+  await expect(page.locator('input[name="name"]')).toBeFocused();
+  await expect(page.locator('input[name="name"]')).toBeInViewport();
+  await expect(page.locator(".order-review-modal")).toHaveCount(0);
   await page.locator('input[name="name"]').fill("Test");
   await page.locator('input[name="phone"]').fill("0947040585");
   const neighborhoodSelect = page.locator(".neighborhood-select");
@@ -78,6 +86,16 @@ test("desktop renders the ordering menu, aligns hash sections, toggles cart, kee
   await expect(page.locator(".checkout-final")).toContainText("360");
   await expect(page.locator(".checkout-final small")).toHaveCount(0);
   await expect(page.locator(".delivery-option b")).toHaveCount(0);
+  await streetInput.fill("");
+  await page.locator(".checkout-submit").click();
+  await expect(checkoutWarning).toHaveText("يرجى إكمال أو تصحيح الحقول التالية: الموقع بالتحديد.");
+  await expect(checkoutWarning).toBeInViewport();
+  await expect(streetInput).toBeFocused();
+  await expect(streetInput).toBeInViewport();
+  await expect(page.locator(".order-review-modal")).toHaveCount(0);
+  await streetInput.fill("Homs 123, floor #5");
+  await expect(checkoutWarning).toHaveCount(0);
+  await expect(page.locator('textarea[name="notes"]')).toHaveValue("");
   await page.locator(".checkout-submit").click();
   await expect(page.locator(".order-review-message")).toContainText("🕒 وقت توفر الخدمة: 9:30 AM - 12:30 AM");
   await page.locator(".order-review-actions button", { hasText: "عودة" }).click();
@@ -151,15 +169,31 @@ test("mobile handles validation, delivery address, add to cart, and checkout con
   await expect(page.locator(".checkout-form")).toContainText("09XXXXXXXX");
   await expect(page.locator(".checkout-form")).toContainText("المنطقة مطلوبة");
   await expect(page.locator(".checkout-form")).toContainText("اختر خدمة توصيل واحدة");
+  const checkoutWarning = page.getByRole("alert");
+  await expect(checkoutWarning).toBeInViewport();
+  await expect(checkoutWarning).toContainText("رقم الهاتف، المنطقة، خدمة التوصيل");
+  await expect(phoneInput).toBeFocused();
+  await expect(phoneInput).toBeInViewport();
+  await expect(page.locator(".order-review-modal")).toHaveCount(0);
 
   await phoneInput.fill("09abc47040585");
   await expect(phoneInput).toHaveValue("0947040585");
+  await page.locator(".checkout-submit").click();
+  await expect(checkoutWarning).toHaveText("يرجى إكمال أو تصحيح الحقول التالية: المنطقة، خدمة التوصيل.");
+  await expect(neighborhoodSelect).toBeFocused();
+  await expect(neighborhoodSelect).toBeInViewport();
 
   await neighborhoodSelect.click();
   await typeNeighborhoodFilter(neighborhoodSelect, "عر");
   await expect(page.locator(".neighborhood-option")).toHaveText("وعر");
   await page.locator(".neighborhood-option", { hasText: "وعر" }).click();
+  await page.locator(".checkout-submit").click();
+  await expect(checkoutWarning).toHaveText("يرجى إكمال أو تصحيح الحقول التالية: خدمة التوصيل.");
+  await expect(checkoutWarning).toBeInViewport();
+  await expect(page.locator('input[name="deliveryCompany"][value="5g"]')).toBeFocused();
+  await expect(page.locator('input[name="deliveryCompany"]:checked')).toHaveCount(0);
   await page.locator('input[name="deliveryCompany"][value="fast-delivery"]').check();
+  await expect(checkoutWarning).toHaveCount(0);
   await expect(page.locator(".checkout-final")).toContainText("390");
   await expect(page.locator(".checkout-submit")).toHaveText("تأكيد الطلب");
   await page.locator('textarea[name="notes"]').fill("Floor 2 #5, near door @ 9pm");
